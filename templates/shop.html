@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <title>Shop</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo1.png') }}" type="image/png">
+</head>
+
+<body id="shop">
+    <!-- Header Section -->
+    <header id="header">
+        <img class="logo" src="{{ url_for('static', filename='logo1.png') }}" alt="Company Logo">
+        <nav>
+            <ul id="navbar">
+                <li><a href="/">Home</a></li>
+                <li><a href="/shop">Shop</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+                <li><a href="/cart"><img src="{{ url_for('static', filename='shoppingbag.svg') }}" class="ring"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <h3 class="shop">Shop</h3>
+    <!-- Category Navigation -->
+<!-- Category Navigation -->
+<nav>
+    <ul id="shopnav">
+        <li><a href="{{ url_for('shop', category='All') }}">All</a></li>
+        <li><a href="{{ url_for('shop', category='Walls') }}">Walls</a></li>
+        <li><a href="{{ url_for('shop', category='Plant') }}">Plants</a></li>
+        <li><a href="{{ url_for('shop', category='Essentials') }}">Essentials</a></li>
+        <li><a href="{{ url_for('shop', category='Stores') }}">Stores</a></li>
+        <li><a href="{{ url_for('shop', category='Gifts') }}">Gifts</a></li>
+    </ul>
+</nav>
+    <!-- Controls -->
+    <div class="controls">
+        <select id="sort-by" class="dropdown">
+            <option value="">Sort by</option>
+            <option value="price-asc">Price: ↓</option>
+            <option value="price-desc">Price: ↑</option>
+        </select>
+    </div>
+    <!-- Featured Products Section -->
+    <div id="feats">
+    {% for product in products %}
+    <div class="featring">
+      <a href="{{ url_for('product', product_id=product[0]) }}">
+      <img src="{{ url_for('static', filename=product[3]) }}" class="fr">
+      </a>
+      <div class="des">
+        <h5>{{ product[1] }}</h5>
+        <p1>₹ {{ product[2] }}</p1>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h6>Quick Links</h6>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/shop">Shop</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h6>Contact Us</h6>
+                <p>Email: puvanasmacrame@gmail.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>2025 Puvana's Macrame</p>
+        </div>
+    </footer>
+    
+<script>
+document.getElementById('sort-by').addEventListener('change', function () {
+    const sortBy = this.value;
+    const container = document.getElementById('feats'); // corrected ID
+    const products = Array.from(container.getElementsByClassName('featring')); // corrected class
+
+    let sorted = [];
+    if (sortBy === 'price-asc') {
+        sorted = products.sort((a, b) => {
+            return parseFloat(a.querySelector('p1').textContent.replace('₹', '').trim()) -
+                   parseFloat(b.querySelector('p1').textContent.replace('₹', '').trim());
+        });
+    } else if (sortBy === 'price-desc') {
+        sorted = products.sort((a, b) => {
+            return parseFloat(b.querySelector('p1').textContent.replace('₹', '').trim()) -
+                   parseFloat(a.querySelector('p1').textContent.replace('₹', '').trim());
+        });
+    } else {
+        return;
+    }
+
+    // Clear and re-add sorted elements
+    container.innerHTML = '';
+    sorted.forEach(item => container.appendChild(item));
+});
+</script>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='cart.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout - Puvana's Macrame</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>Enter Shipping Details</h2>
+  <form action="/checkout" method="POST">
+    <label>Name:</label>
+    <input type="text" name="name" required><br>
+
+    <label>Address:</label>
+    <textarea name="address" required></textarea><br>
+
+    <label>Contact Number:</label>
+    <input type="text" name="contact" required><br>
+
+
+    <input type="hidden" name="total" value="{{ total }}">
+
+    <button type="submit">Place Order</button>
+  </form>
+</body>
+</html>

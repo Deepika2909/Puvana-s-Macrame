@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <title>My Cart</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo1.png') }}" type="image/png" />
+    <script src="{{ url_for('static', filename='cart.js') }}"></script>
+</head>
+
+<body>
+    <header id="header">
+        <img class="logo" src="{{ url_for('static', filename='logo1.png') }}" alt="Company Logo" />
+        <nav>
+            <ul id="navbar">
+                <li><a href="/">Home</a></li>
+                <li><a href="/shop">Shop</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+                <li><a href="/cart"><img src="{{ url_for('static', filename='shoppingbag.svg') }}" class="ring" /></a></li>
+            </ul>
+        </nav>
+    </header>
+
+<div class="cart-container">
+    
+    <div class="cart-items">
+        <h1>Your Cart</h1>
+        {% if products %}
+            {% set ns = namespace(subtotal=0) %}
+            {% for item in products %}
+                {% set ns.subtotal = ns.subtotal + item[2]|float %}
+                <div class="cart-item">
+                    <img src="{{ url_for('static', filename=item[3]) }}" alt="{{ item[1] }}" class="cartitemimg">
+                    <div class="item-details ">
+                        <h4>{{ item[1] }}</h4>
+                        <p class="p4">₹ {{ item[2] }}</p>
+                        <div class="quantity-control">
+                            <button class="decrease">-</button>
+                            <input type="number" value="1" min="1">
+                            <button class="increase">+</button>
+                        </div>
+                        <form method="post" action="{{ url_for('remove_from_cart', product_id=item[0]) }}">
+                            <button type="submit" class="remove-item">X</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+    </div>
+
+    {% if products %}
+    <div class="cart-summary">
+        <h1>Order Summary</h1>
+        <p id="ptop" class="p4">Subtotal: ₹ {{ ns.subtotal }}</p>
+        <p class="p4">Shipping: ₹ 50.00</p>
+        <p class="p4" id="cartTotal">Total: ₹ {{ ns.subtotal + 50 }}</p>
+
+<form action="/checkout" method="GET" onsubmit="return passTotalToCheckout()">
+  <input type="hidden" name="total" id="hiddenTotal">
+  <button type="submit" class="checkout">Checkout</button>
+</form>
+
+    </div>
+    {% endif %}
+</div>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h6>Quick Links</h6>
+                <ul>
+                    <li><a href="/index">Home</a></li>
+                    <li><a href="/shop">Shop</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h6>Contact Us</h6>
+                <p>Email: puvanasmacrame@gmail.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>2025 Puvana's Macrame</p>
+        </div>
+    </footer>
+    <script>
+  function passTotalToCheckout() {
+    const totalText = document.getElementById('cartTotal').textContent;
+    const totalValue = totalText.replace(/[^0-9.]/g, '');
+    document.getElementById('hiddenTotal').value = totalValue;
+    return true;
+  }
+</script>
+</body>
+</html>

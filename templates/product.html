@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puvana's Macrame</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="{{ url_for('static', filename='product.js') }}" defer></script>
+  <link rel="icon" href="{{ url_for('static', filename='logo1.png') }}" type="image/png" />
+</head>
+
+<body id="productbody">
+  <!-- Header -->
+  <header id="header">
+    <img class="logo" src="{{ url_for('static', filename='logo1.png') }}" alt="Company Logo" />
+    <nav>
+      <ul id="navbar">
+        <li><a href="/">Home</a></li>
+        <li><a href="/shop">Shop</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li>
+          <a href="/cart">
+            <img src="{{ url_for('static', filename='shoppingbag.svg') }}" class="ring" />
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Product Details -->
+  <section id="details">
+    <div class="product-carousel">
+      <div class="product-imgs">
+        <img src="{{ url_for('static', filename=product[4]) }}" alt="{{ product[1] }}" class="active" />
+
+      </div>
+
+      <div class="product-details">
+        <h1>{{ product[2] }}</h1>
+        <p class="price">₹ {{ product[3] }}</p>
+        <p class="description">
+          {{ product[5] if product[5] else "This exquisite item is perfect for any occasion!" }}
+        </p>
+
+
+        
+        <form action="{{ url_for('add_to_cart', product_id=product[0]) }}" method="POST">
+        <button class="add-to-cart" data-id="{{ product[0] }}">Add to Cart</button></form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recommendations -->
+  <div id="recommendations">
+    <h1 id="recommends">You may also like</h1>
+    <div class="recommended-items">
+      {% for item in recommended_items %}
+        <div class="product-item">
+          <a href="{{ url_for('product', product_id=item[0]) }}">
+            <img src="{{ url_for('static', filename=item[4]) }}" alt="{{ item[1] }}" class="product-image" />
+          </a>
+          <div id="des">
+            <h5>{{ item[1] }}</h5>
+            <p1>₹{{ item[3] }}</p1>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section">
+        <h6>Quick Links</h6>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop">Shop</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h6>Contact Us</h6>
+        <p>Email: stylinwiring@gmail.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>2024 Stylin' Wiring.</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href= "static\logo1.png" type="image/png">
+    <title>About </title>
+
+    <link rel="stylesheet" href="static\style.css" />
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header id="header">
+        <img class="logo" src="{{ url_for('static', filename='logo1.png') }}" alt="Company Logo">
+        <nav >
+            
+            <ul id="navbar">
+                <li><a href="/">Home</a></li>
+                <li><a href="shop">Shop</a></li>
+                <li><a href="about">About</a></li>
+                <li><a href="contact">Contact</a></li>
+                <li><a href="cart"><img src="static\shoppingbag.svg" class="ring"></a></li>
+            </ul>
+        </nav>
+    </header>
+
+        
+        <div id="descript2">
+            <h3> 🧵 About Puvana's Macrame</h3>
+            <div id="handcontainer">
+                <p>Each piece is handcrafted with care. Our macrame decor blends quality and charm, perfect for gifting or adding warmth to your everyday space.</p>
+                <div id="hand">
+                    <img id="threeflowers" src="static\mini (4).jpg" alt="Three Flower Rings" class="hand" width= 250px height=50px>
+                </div>
+            </div>
+        </div>
+
+        
+
+        <footer>
+            <div class="footer-container">
+                
+                <div class="footer-section">
+                    <h6>Quick Links</h6>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="shop">Shop</a></li>
+                        <li><a href="about">About</a></li>
+                        <li><a href="contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                        <h6>Contact Us</h6>
+                        <p>Email: puvanasmacrame@gmail.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>2025 puvana's macrame.</p>
+            </div>
+        </footer>
+</body>
+
+</html>
