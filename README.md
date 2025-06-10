@@ -10,12 +10,6 @@ This platform is dedicated to presenting and selling unique macrame products—f
 
 ---
 
-## 🌟 Preview
-
-![Puvana's Macrame Preview](/static/preview.png) <!-- Replace with actual path -->
-
----
-
 ## ✨ Features
 
 - **Beautiful Product Listings**  
