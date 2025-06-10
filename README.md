@@ -1,33 +1,60 @@
-# Stylin-Wiring Jewelry Website
+# 🌸 Puvana's Macrame - Handmade Decor & Accessories
 
-Welcome to the Stylin' Wiring Jewelry Website repository! This website is a showcase of beautiful jewelry pieces crafted with love and care, designed to provide a seamless shopping experience with a clean and minimalistic aesthetic.
-
-## About the Website
-This website is a platform to display and sell unique jewelry pieces created using various wiring techniques. Our mission is to provide a seamless online shopping experience for our customers, while promoting the art of sustainable jewelry making.
-
-# Preview
-![Stylin' Wiring Jewelry Website Preview](/stylin'%20wiring/Jewelry-E-commerce-Website-Screenshot.png)
-
-## Features
-#### Stay updated with our latest news, promotions, and creations
-
-- **Product Listings:** Visually appealing product pages with detailed descriptions and images on carousel
-- **Shopping Cart:** User-friendly shopping cart functionality for easy purchasing and minimal steps
-- **Contact Page:** Easy to find contact information for inquiries
-- **Modern UI/UX:** Minimalistic and elegant design with a focus on usability
-- Filter by category or search for specific items
-
-### Upcoming Features
-- **Fully Responsive Design** Optimized for all devices, adding tablets
-- **Improved Search Functionality** Advanced search options to help customers find what they're looking for more
-- **SQL Implementation** For product listings and easy content management.
-- **Improved Checkout Process** Streamlined checkout process for a more seamless shopping experience
-- 
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE.txt file for details.
+Welcome to the **Puvana's Macrame** website repository! This site showcases handcrafted macrame art, created with passion and detail to bring charm and warmth into every space. The site is designed for a smooth and elegant shopping experience, featuring a clean and minimalistic layout.
 
 ---
 
-Have fun browsing our collection of stylish jewelry pieces!
+## 🧶 About the Website
+
+This platform is dedicated to presenting and selling unique macrame products—from wall hangings to plant holders and home essentials. Our mission is to deliver an intuitive online shopping experience while celebrating the timeless art of macrame.
+
+---
+
+## 🌟 Preview
+
+![Puvana's Macrame Preview](/static/preview.png) <!-- Replace with actual path -->
+
+---
+
+## ✨ Features
+
+- **Beautiful Product Listings**  
+  Display products with clear visuals and detailed descriptions.
+
+- **Smart Shopping Cart**  
+  Add and manage products with ease, leading to a simple checkout flow.
+
+- **Contact Page**  
+  Quick access to contact details for customer support.
+
+- **Modern Minimal UI/UX**  
+  Responsive design with focus on calm aesthetics and usability.
+
+- **Category Filters**  
+  Easily browse by Wall Decor, Essentials, or Plant Accessories.
+
+---
+
+## 🚧 Upcoming Features
+
+- **Fully Responsive Design**  
+  Optimized for mobile, tablet, and desktop devices.
+
+- **Enhanced Search Functionality**  
+  Smarter search filters and keyword matching.
+
+- **SQL Integration**  
+  Dynamic product handling via SQLite backend.
+
+- **Streamlined Checkout**  
+  Improved flow for user-friendly purchasing.
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License – see the [LICENSE](LICENSE.txt) file for details.
+
+---
+
+Thank you for visiting **Puvana's Macrame** – where every knot tells a story 🌿
