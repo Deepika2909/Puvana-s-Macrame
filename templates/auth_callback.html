@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Authenticating...</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+  <script>
+    const client = supabase.createClient(
+      'https://kfdqdghuwhvjuafdpgis.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmZHFkZ2h1d2h2anVhZmRwZ2lzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzM3ODksImV4cCI6MjA2NTY0OTc4OX0.kPPPIFxKfEgxN4ObUWikpw1TCtY5zmBo-DIO-8V5ZF8'
+    );
+
+ async function handleUserSession() {
+  const { data, error } = await client.auth.getUser();
+
+  if (error || !data.user) {
+    document.body.innerHTML = "<h3>Authentication failed. Please try again.</h3>";
+    return;
+  }
+
+  const email = data.user.email;
+  const name = data.user.user_metadata.full_name || data.user.user_metadata.name || "";
+
+  fetch("/store_session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email: email, name: name })
+  }).then(() => {
+    window.location.href = "/";  // ✅ Redirect to profile
+  });
+}
+
+
+    handleUserSession();
+  </script>
+</body>
+</html>

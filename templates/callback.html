@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Authenticating...</title>
+</head>
+<body>
+  <p>Signing you in...</p>
+  <script>
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+
+    if (accessToken) {
+      fetch("/auth/callback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ access_token: accessToken })
+      }).then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            window.location.href = "/";
+          } else {
+            alert("Login failed.");
+          }
+        });
+    } else {
+      document.body.innerHTML = "No token found.";
+    }
+  </script>
+</body>
+</html>

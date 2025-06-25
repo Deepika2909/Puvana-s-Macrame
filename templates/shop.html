@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shop | Puvana's Macrame</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background-color: #fffaf7;
+    }
+
+    .card {
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-img-container {
+      height: 250px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #fdf9f5;
+    }
+
+    .card-img-container img {
+      max-height: 100%;
+      width: auto;
+      object-fit: contain;
+    }
+
+    canvas#petals-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .puvana-footer {
+      background-color: #fff7f2;
+      color: #5b4033;
+      font-family: 'Georgia', serif;
+      border-top: 1px dashed #dcbba6;
+      box-shadow: inset 0 5px 10px rgba(0,0,0,0.04);
+      padding-top: 30px;
+    }
+
+    .footer-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 30px;
+      gap: 30px;
+    }
+
+    .footer-brand h2 {
+      font-family: 'Brush Script MT', cursive;
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .footer-brand p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .footer-nav h4,.footer-contact h4 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .footer-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .footer-nav li {
+      margin-bottom: 6px;
+    }
+
+    .footer-nav a,
+    .footer-contact a {
+      text-decoration: none;
+      color: #5b4033;
+      transition: color 0.3s ease;
+    }
+
+    .footer-nav a:hover,
+    .footer-contact a:hover {
+      color: #b87333;
+    }
+
+    .footer-contact p {
+      margin: 0;
+      font-size: 14px;
+    }
+.puvana-header {
+  background-color: #fff7f2;
+  padding: 15px 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px dashed #e8cfc0;
+  font-family: 'Georgia', serif;
+  position: relative;
+}
+
+.logo-img {
+  height: 150px;
+  transition: transform 0.3s ease;
+}
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+.puvana-nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.puvana-nav .nav-link {
+  color: #5b4033;
+  font-size: 16px;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+.puvana-nav .nav-link::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #b87333;
+  transition: width 0.3s ease;
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+}
+.puvana-nav .nav-link:hover {
+  color: #b87333;
+}
+.puvana-nav .nav-link:hover::after {
+  width: 100%;
+}
+.puvana-nav .cart-icon {
+  font-size: 18px;
+  color: #8d5c2c;
+}
+
+/* Hamburger Styles */
+.menu-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menu-toggle .bar {
+  width: 25px;
+  height: 3px;
+  background-color: #5b4033;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: flex;
+  }
+
+  .puvana-nav {
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease;
+    width: 100%;
+  }
+
+  .puvana-nav.active {
+    max-height: 500px;
+  }
+
+  .puvana-nav .nav-link {
+    padding: 10px 20px;
+    text-align: left;
+    border-top: 1px solid #f3d7c6;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: flex;
+  }}
+/* Mobile Styles */
+
+.footer-bottom {
+  text-align: center;
+  font-size: 13px;
+  padding: 15px 0;
+  border-top: 1px dotted #ddbda4;
+  margin-top: 30px;
+  background-color: #fff2ec;
+}
+.btn-lightest-green {
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      background-color: transparent;
+    }
+
+    .btn-lightest-green:hover {
+      background-color: #d4edda !important;
+      color: #155724 !important;
+      border-color: #c3e6cb !important;
+    }
+    .category-btn {
+  color: black;
+  border: 2px solid #155724; /* dark green border */
+  border-radius: 25px;
+  padding: 6px 18px;
+  font-weight: 500;
+  background-color: transparent;
+  transition: all 0.3s ease-in-out;
+}
+
+.category-btn:hover,
+.category-btn.active {
+  background-color: #155724; /* fill with green */
+  color: white !important;
+  text-decoration: none;
+}
+    #scrollTopBtn {
+      display: none;
+      position: fixed;
+      bottom: 30px;
+      right: 20px;
+      z-index: 99;
+      font-size: 22px;
+      border: none;
+      outline: none;
+      background-color: #a0d77d;
+      color: white;
+      cursor: pointer;
+      padding: 12px;
+      border-radius: 50%;
+      transition: 0.4s ease;
+    }
+
+    #scrollTopBtn:hover {
+      background-color: #81ce51;
+    }
+
+
+  </style>
+</head>
+
+<body>
+<canvas id="petals-canvas"></canvas>
+
+<header class="puvana-header">
+  <div class="container d-flex justify-content-between align-items-center">
+    
+    <!-- Left: Logo -->
+    <a href="/" class="d-flex align-items-center">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Puvana's Macrame" class="logo-img">
+    </a>
+
+    <!-- Right: Nav & Hamburger -->
+    <div class="d-flex align-items-center">
+      <!-- Nav menu (hidden in mobile) -->
+      <nav class="puvana-nav" id="navMenu">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/shop" class="nav-link">Shop</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="/contact" class="nav-link">Contact</a>
+        <a href="/cart" class="nav-link cart-icon"><i class="bi bi-bag-fill fs-5"></i></a>
+        {% if user %}
+          <a href="{{ url_for('profile') if user else url_for('user') }}">
+          <i class="bi bi-person-circle fs-4" style="color: #8d5c2c;"></i>
+        </a>
+        {% else %}
+          <a href="/user" class="nav-link bi bi-person-circle fs-5"></a>
+        {% endif %}
+      </nav>
+
+      <!-- Hamburger icon -->
+      <button class="menu-toggle d-md-none ms-3" id="menuToggle">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
+
+  </div>
+</header>
+
+<!-- Title -->
+<div class="py-4 text-center" style="background-color: #eff5ef;">
+  <h2 class="fw-bold">Shop</h2>
+</div>
+
+<!-- Category Navigation -->
+<!-- Category Navigation -->
+<!-- Category Navigation -->
+<div class="container py-3">
+  <ul class="nav justify-content-center flex-wrap gap-2">
+    <li class="nav-item"><a class="btn custom-category" href="{{ url_for('shop', category='All') }}">All</a></li>
+    <li class="nav-item"><a class="btn custom-category" href="{{ url_for('shop', category='Walls') }}">Walls</a></li>
+    <li class="nav-item"><a class="btn custom-category" href="{{ url_for('shop', category='Plant') }}">Plants</a></li>
+    <li class="nav-item"><a class="btn custom-category" href="{{ url_for('shop', category='Essentials') }}">Essentials</a></li>
+    <li class="nav-item"><a class="btn custom-category" href="{{ url_for('shop', category='Stores') }}">Stores</a></li>
+    <li class="nav-item"><a class="btn custom-category" href="{{ url_for('shop', category='Gifts') }}">Gifts</a></li>
+  </ul>
+</div>
+
+
+
+<!-- Sort Dropdown -->
+<div class="container mb-4 text-end">
+  <select id="sort-by" class="form-select w-auto d-inline">
+    <option value="">Sort by</option>
+    <option value="price-asc">Price: ↓</option>
+    <option value="price-desc">Price: ↑</option>
+  </select>
+</div>
+
+<!-- Products -->
+<div class="container mb-5">
+  <div id="feats" class="row g-4 row-cols-2 row-cols-sm-2 row-cols-md-5">
+  {% for product in products %}
+  <div class="col d-flex justify-content-center">
+    <div class="card text-center" style="width: 200px; height: 300px; padding: 10px;">
+      <div class="card-img-container"
+           style="height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 20px;">
+          <a href="{{ url_for('product', product_id=product['id']) }}">
+            <img src="{{ product['image'] }}"
+                 alt="{{ product['name'] }}"
+                 style="max-height: 100%; max-width: 100%; object-fit: contain; display: block;" />
+          </a>
+      </div>
+      <div class="card-body">
+        <h6 class="card-title fw-bold mb-1" style="font-size: 1rem;">{{ product['name'] }}</h6>
+        <p class="card-text" style="font-size: 0.9rem;">₹ {{ product['price'] }}</p>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="puvana-footer">
+  <div class="footer-container">
+    <!-- Column 1: Brand -->
+    <div class="footer-brand">
+      <h2>Puvana's Macrame</h2>
+      <p>Crafted threads. Heartfelt designs. 🌿</p>
+    </div>
+
+    <!-- Column 2: Navigation -->
+    <div class="footer-nav">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/shop">Shop</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 3: Contact -->
+    <div class="footer-contact">
+      <h4>Let's Connect</h4>
+      <p>Email us at:</p>
+      <a href="mailto:puvanasmacrame@gmail.com">puvanasmacrame@gmail.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom text-center">
+    <p>© 2025 Puvana’s Macrame — Woven with Love</p>
+  </div>
+</footer>
+<button onclick="scrollToTop()" id="scrollTopBtn" title="Go to top">⬆️</button>
+
+
+<!-- Scripts -->
+<script>
+  document.getElementById('sort-by').addEventListener('change', function () {
+    const sortBy = this.value;
+    const container = document.getElementById('feats');
+    const products = Array.from(container.children);
+
+    let sorted = [];
+    if (sortBy === 'price-asc') {
+      sorted = products.sort((a, b) => parseFloat(a.querySelector('.card-text').textContent.replace('₹', '')) - parseFloat(b.querySelector('.card-text').textContent.replace('₹', '')));
+    } else if (sortBy === 'price-desc') {
+      sorted = products.sort((a, b) => parseFloat(b.querySelector('.card-text').textContent.replace('₹', '')) - parseFloat(a.querySelector('.card-text').textContent.replace('₹', '')));
+    }
+
+    container.innerHTML = '';
+    sorted.forEach(item => container.appendChild(item));
+  });
+
+  const canvas = document.getElementById("petals-canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const petals = Array.from({ length: 25 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 6 + 4,
+    d: Math.random() * 50,
+    color: `rgba(255,182,193,0.8)`
+  }));
+
+  let angle = 0;
+  function drawPetals() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angle += 0.01;
+    petals.forEach((p, i) => {
+      p.y += Math.cos(angle + p.d) + 1 + p.r / 2;
+      p.x += Math.sin(angle) * 2;
+      if (p.x > canvas.width || p.x < 0 || p.y > canvas.height) {
+        petals[i] = {
+          x: Math.random() * canvas.width,
+          y: -10,
+          r: p.r,
+          d: p.d,
+          color: p.color
+        };
+      }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawPetals);
+  }
+  drawPetals();
+    function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const topBtn = document.getElementById("scrollTopBtn");
+  window.onscroll = function () {
+    topBtn.style.display = window.scrollY > 200 ? "block" : "none";
+  };
+  const menuToggle = document.getElementById("menuToggle");
+  const navMenu = document.getElementById("navMenu");
+
+  menuToggle.addEventListener("click", () => {
+    navMenu.classList.toggle("active");
+  });
+</script>
+
+</body>
+</html>

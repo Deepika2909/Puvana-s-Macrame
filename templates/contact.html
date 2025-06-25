@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact | Puvana's Macrame</title>
+
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary-color: #b77b57;
+      --accent-color: #f0f0f0;
+      --text-dark: #3c2f2f;
+      --bg-light: #fffaf5;
+    }
+
+    body {
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header{
+      position: relative;
+      z-index: 2;
+    }
+
+    .nav-link {
+      color: var(--text-dark);
+    }
+
+    .nav-link:hover {
+      color: var(--primary-color);
+    }
+
+    .contact-section {
+      padding: 4rem 1rem;
+      text-align: center;
+      animation: fadeIn 1s ease-in;
+      position: relative;
+      z-index: 2;
+    }
+
+    .contact-section h2 {
+      color: var(--primary-color);
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+
+    .contact-box {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .contact-box:hover {
+      transform: translateY(-5px);
+    }
+
+    .contact-box i {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #petals-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .puvana-footer {
+  background-color: #fff7f2;
+  color: #5b4033;
+  font-family: 'Georgia', serif;
+  border-top: 1px dashed #dcbba6;
+  box-shadow: inset 0 5px 10px rgba(0,0,0,0.04);
+  padding-top: 30px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 30px;
+  gap: 30px;
+}
+
+.footer-brand h2 {
+  font-family: 'Brush Script MT', cursive;
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.footer-brand p {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.footer-nav h4,
+.footer-contact h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.footer-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-nav li {
+  margin-bottom: 6px;
+}
+
+.footer-nav a,
+.footer-contact a {
+  text-decoration: none;
+  color: #5b4033;
+  transition: color 0.3s ease;
+}
+
+.footer-nav a:hover,
+.footer-contact a:hover {
+  color: #b87333;
+}
+
+.footer-contact p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 13px;
+  padding: 15px 0;
+  border-top: 1px dotted #ddbda4;
+  margin-top: 30px;
+  background-color: #fff2ec;
+}
+.puvana-header {
+  background-color: #fff7f2;
+  padding: 15px 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px dashed #e8cfc0;
+  font-family: 'Georgia', serif;
+  position: relative;
+}
+
+.logo-img {
+  height: 150px;
+  transition: transform 0.3s ease;
+}
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+.puvana-nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.puvana-nav .nav-link {
+  color: #5b4033;
+  font-size: 16px;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+.puvana-nav .nav-link::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #b87333;
+  transition: width 0.3s ease;
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+}
+.puvana-nav .nav-link:hover {
+  color: #b87333;
+}
+.puvana-nav .nav-link:hover::after {
+  width: 100%;
+}
+.puvana-nav .cart-icon {
+  font-size: 18px;
+  color: #8d5c2c;
+}
+
+/* Hamburger Styles */
+.menu-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menu-toggle .bar {
+  width: 25px;
+  height: 3px;
+  background-color: #5b4033;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: flex;
+  }
+
+ .puvana-nav {
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease;
+    width: 100%;
+  }
+
+  .puvana-nav.active {
+    max-height: 500px;
+  }
+
+  .puvana-nav .nav-link {
+    padding: 10px 20px;
+    text-align: left;
+    border-top: 1px solid #f3d7c6;
+  }
+}
+
+  .puvana-nav.active {
+    display: flex;
+  }
+}
+
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="petals-canvas"></canvas>
+
+<header class="puvana-header">
+  <div class="container d-flex justify-content-between align-items-center">
+    
+    <!-- Left: Logo -->
+    <a href="/" class="d-flex align-items-center">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Puvana's Macrame" class="logo-img">
+    </a>
+
+    <!-- Right: Nav & Hamburger -->
+    <div class="d-flex align-items-center">
+      <!-- Nav menu (hidden in mobile) -->
+      <nav class="puvana-nav" id="navMenu">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/shop" class="nav-link">Shop</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="/contact" class="nav-link">Contact</a>
+        <a href="/cart" class="nav-link cart-icon"><i class="bi bi-bag-fill fs-5"></i></a>
+        {% if user %}
+          <a href="{{ url_for('profile') if user else url_for('user') }}">
+          <i class="bi bi-person-circle fs-4" style="color: #8d5c2c;"></i>
+        </a>
+        {% else %}
+          <a href="/user" class="nav-link bi bi-person-circle fs-5"></a>
+        {% endif %}
+      </nav>
+
+      <!-- Hamburger icon -->
+      <button class="menu-toggle d-md-none ms-3" id="menuToggle">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
+
+  </div>
+</header>
+
+
+
+  <section class="contact-section container">
+    <h2>Get in Touch</h2>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-4">
+        <a href="https://www.google.co.in/maps/place/Puvana's+Macrame/@9.6046009,77.9452381,17z/data=!3m1!4b1!4m6!3m5!1s0x3b012b71855dcd85:0x4950eca62e7bb0ce!8m2!3d9.6046009!4d77.947813!16s%2Fg%2F11wjgxfvsm?entry=ttu&g_ep=EgoyMDI1MDYxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="text-decoration: none; color: inherit;">
+        <div class="contact-box">
+        <i class="bi bi-geo-alt-fill"></i>
+        <h5>Address</h5>
+        <p>6/673-8, Pandiyan St, Lakshmi Nagar, GT Nagar, Virudhunagar, Tamil Nadu 626001</p>
+        </div>
+        </a>
+        </div>
+
+      <div class="col-md-4">
+  <a href="mailto:puvanasmacrame@gmail.com" style="text-decoration: none; color: inherit;">
+    <div class="contact-box">
+      <i class="bi bi-envelope-fill"></i>
+      <h5>Email</h5>
+      <p>puvanasmacrame@gmail.com</p>
+    </div>
+  </a>
+</div>
+
+      <div class="col-md-4">
+        <div class="contact-box">
+          <i class="bi bi-telephone-fill"></i>
+          <h5>Phone</h5>
+          <p>+91 9791718452,
+          +91 9496392884</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer class="puvana-footer">
+  <div class="footer-container">
+    <!-- Column 1: Brand -->
+    <div class="footer-brand">
+      <h2>Puvana's Macrame</h2>
+      <p>Crafted threads. Heartfelt designs. 🌿</p>
+    </div>
+
+    <!-- Column 2: Navigation -->
+    <div class="footer-nav">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/shop">Shop</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 3: Contact -->
+    <div class="footer-contact">
+      <h4>Let's Connect</h4>
+      <p>Email us at:</p>
+      <a href="mailto:puvanasmacrame@gmail.com">puvanasmacrame@gmail.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Puvana’s Macrame — Woven with Love</p>
+  </div>
+</footer>
+
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Petal Animation -->
+  <script>
+     const menuToggle = document.getElementById("menuToggle");
+  const navMenu = document.getElementById("navMenu");
+
+  menuToggle.addEventListener("click", () => {
+    navMenu.classList.toggle("active");
+  });
+    const canvas = document.getElementById('petals-canvas');
+    const ctx = canvas.getContext('2d');
+    let petals = [];
+    function resizeCanvas() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+    }
+    function Petal() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * -canvas.height;
+      this.size = Math.random() * 15 + 10;
+      this.speedY = Math.random() * 2 + 1;
+      this.speedX = Math.random() * 1 - 0.5;
+      this.opacity = Math.random() * 0.5 + 0.3;
+      this.reset = () => {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * -canvas.height;
+      };
+      this.update = () => {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        if (this.y > canvas.height) this.reset();
+      };
+      this.draw = () => {
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,182,193,${this.opacity})`;
+        ctx.ellipse(this.x, this.y, this.size * 0.6, this.size, 0, 0, 2 * Math.PI);
+        ctx.fill();
+      };
+    }
+    resizeCanvas();
+    window.onresize = resizeCanvas;
+    for (let i = 0; i < 30; i++) petals.push(new Petal());
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      petals.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>

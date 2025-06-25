@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart | Puvana's Macrame</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #b77b57;
+      --accent-color: #f0f0f0;
+      --text-dark: #3c2f2f;
+      --bg-light: #fffaf5;
+    }
+
+    body {
+      background-color: var(--bg-light);
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--text-dark);
+    }
+    .puvana-header {
+  background-color: #fff7f2;
+  padding: 15px 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px dashed #e8cfc0;
+  font-family: 'Georgia', serif;
+  position: relative;
+}
+
+.logo-img {
+  height: 150px;
+  transition: transform 0.3s ease;
+}
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+.puvana-nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.puvana-nav .nav-link {
+  color: #5b4033;
+  font-size: 16px;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+.puvana-nav .nav-link::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #b87333;
+  transition: width 0.3s ease;
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+}
+.puvana-nav .nav-link:hover {
+  color: #b87333;
+}
+.puvana-nav .nav-link:hover::after {
+  width: 100%;
+}
+.puvana-nav .cart-icon {
+  font-size: 18px;
+  color: #8d5c2c;
+}
+
+/* Hamburger Styles */
+.menu-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menu-toggle .bar {
+  width: 25px;
+  height: 3px;
+  background-color: #5b4033;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: flex;
+  }
+
+  .puvana-nav {
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease;
+    width: 100%;
+  }
+
+  .puvana-nav.active {
+    max-height: 500px;
+  }
+
+  .puvana-nav .nav-link {
+    padding: 10px 20px;
+    text-align: left;
+    border-top: 1px solid #f3d7c6;
+  }
+}
+
+
+    .cart-item {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .btn-remove {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-checkout {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    .btn-checkout:hover {
+      background-color: #8c5e3c;
+    }
+
+  .puvana-footer {
+  background-color: #fff7f2;
+  color: #5b4033;
+  font-family: 'Georgia', serif;
+  border-top: 1px dashed #dcbba6;
+  box-shadow: inset 0 5px 10px rgba(0,0,0,0.04);
+  padding-top: 30px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 30px;
+  gap: 30px;
+}
+
+.footer-brand h2 {
+  font-family: 'Brush Script MT', cursive;
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.footer-brand p {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.footer-nav h4,
+.footer-contact h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.footer-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-nav li {
+  margin-bottom: 6px;
+}
+
+.footer-nav a,
+.footer-contact a {
+  text-decoration: none;
+  color: #5b4033;
+  transition: color 0.3s ease;
+}
+
+.footer-nav a:hover,
+.footer-contact a:hover {
+  color: #b87333;
+}
+
+.footer-contact p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 13px;
+  padding: 15px 0;
+  border-top: 1px dotted #ddbda4;
+  margin-top: 30px;
+  background-color: #fff2ec;
+}
+
+
+    .summary-box {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .flex-md-row {
+        flex-direction: column !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="puvana-header">
+  <div class="container d-flex justify-content-between align-items-center">
+    
+    <!-- Left: Logo -->
+    <a href="/" class="d-flex align-items-center">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Puvana's Macrame" class="logo-img">
+    </a>
+
+    <!-- Right: Nav & Hamburger -->
+    <div class="d-flex align-items-center">
+      <!-- Nav menu (hidden in mobile) -->
+      <nav class="puvana-nav" id="navMenu">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/shop" class="nav-link">Shop</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="/contact" class="nav-link">Contact</a>
+        <a href="/cart" class="nav-link cart-icon"><i class="bi bi-bag-fill fs-5"></i></a>
+        {% if user %}
+          <a href="{{ url_for('profile') if user else url_for('user') }}">
+          <i class="bi bi-person-circle fs-4" style="color: #8d5c2c;"></i>
+        </a>
+        {% else %}
+          <a href="/user" class="nav-link bi bi-person-circle fs-5"></a>
+        {% endif %}
+      </nav>
+
+      <!-- Hamburger icon -->
+      <button class="menu-toggle d-md-none ms-3" id="menuToggle">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
+
+  </div>
+</header>
+
+{% if products %}
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">🛒 Your Cart</h2>
+    <div class="d-flex flex-md-row gap-4">
+      
+      <!-- Left: Cart Items -->
+      <div class="w-100">
+        {% for item in products %}
+          <div class="cart-item" data-id="{{ item.id }}" data-price="{{ item.price }}">
+            <button class="btn btn-sm btn-outline-danger btn-remove">
+              <i class="bi bi-trash-fill"></i>
+            </button>
+            <div class="d-flex align-items-center">
+              <img src="{{ item.image }}"
+                alt="{{ item.name }}"
+                class="me-4"
+                style="width: 120px; border-radius: 8px;">
+
+              <div class="flex-grow-1">
+                <h5>{{ item.name }}</h5>
+                <div class="quantity-controls mb-2">
+                  <button class="btn btn-sm btn-outline-secondary btn-decrease">-</button>
+                  <span class="quantity">{{ item.quantity }}</span>
+                  <button class="btn btn-sm btn-outline-secondary btn-increase">+</button>
+                </div>
+                <p class="item-total fw-bold">Subtotal: ₹{{ item.subtotal }}</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <!-- Right: Summary -->
+      <div style="min-width: 300px;">
+        <div class="summary-box">
+          <h5>Order Summary</h5>
+          <hr />
+          <p>Total Price: ₹<span id="cart-total">{{ total }}</span></p>
+          <p>Shipping: ₹<span id="shipping">70</span></p>
+          <h6 class="fw-bold">Grand Total: ₹<span id="grand-total">{{ total + 70 }}</span></h6>
+          {% if session.get('user_id') %}
+            <a href="/checkout" class="btn btn-checkout mt-3">Proceed to Checkout</a>
+          {% else %}
+            <a href="/user" class="btn btn-checkout mt-3 disabled" onclick="alert('Please log in to proceed to checkout')">Login to Checkout</a>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <h3 class="text-center mt-5">Your cart is empty 😢</h3>
+{% endif %}
+
+<!-- Footer -->
+<footer class="puvana-footer">
+  <div class="footer-container">
+    <!-- Column 1: Brand -->
+    <div class="footer-brand">
+      <h2>Puvana's Macrame</h2>
+      <p>Crafted threads. Heartfelt designs. 🌿</p>
+    </div>
+
+    <!-- Column 2: Navigation -->
+    <div class="footer-nav">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/shop">Shop</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 3: Contact -->
+    <div class="footer-contact">
+      <h4>Let's Connect</h4>
+      <p>Email us at:</p>
+      <a href="mailto:puvanasmacrame@gmail.com">puvanasmacrame@gmail.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Puvana’s Macrame — Woven with Love</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('.cart-item').forEach(item => {
+      const price = parseFloat(item.dataset.price);
+      const quantity = parseInt(item.querySelector('.quantity').textContent);
+      const subtotal = price * quantity;
+      item.querySelector('.item-total').textContent = 'Subtotal: ₹' + subtotal.toFixed(2);
+      total += subtotal;
+    });
+    document.getElementById('cart-total').textContent = total.toFixed(2);
+    const shipping = 70;
+    document.getElementById('grand-total').textContent = (total + shipping).toFixed(2);
+  }
+
+  document.querySelectorAll('.btn-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.cart-item');
+      const productId = item.dataset.id;
+      fetch(`/remove_from_cart/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ product_id: productId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          item.remove();
+          updateTotal();
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.btn-increase').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.cart-item');
+      const qtyElem = item.querySelector('.quantity');
+      qtyElem.textContent = parseInt(qtyElem.textContent) + 1;
+      updateTotal();
+    });
+  });
+
+  document.querySelectorAll('.btn-decrease').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.cart-item');
+      const qtyElem = item.querySelector('.quantity');
+      let currentQty = parseInt(qtyElem.textContent);
+      if (currentQty > 1) {
+        qtyElem.textContent = currentQty - 1;
+        updateTotal();
+      }
+    });
+  });
+
+  updateTotal();
+</script>
+<script>  
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    menuToggle.addEventListener("click", () => {
+    navMenu.classList.toggle("active");
+  });</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout | Puvana's Macrame</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary-color: #b77b57;
+      --accent-color: #f0f0f0;
+      --text-dark: #3c2f2f;
+      --bg-light: #fffaf5;
+    }
+    body {
+      background-color: var(--bg-light);
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--text-dark);
+    }
+    header {
+      background-color: var(--accent-color);
+      padding: 1rem 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    nav .nav-link {
+      color: var(--text-dark);
+      margin: 0 0.75rem;
+    }
+    nav .nav-link:hover {
+      color: var(--primary-color);
+    }
+    .summary-box, .form-box {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+    .btn-checkout {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: bold;
+      width: 100%;
+    }
+    .btn-checkout:hover {
+      background-color: #8c5e3c;
+    }
+    footer {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #f0f0f0;">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height: 100px;">
+      </a>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+          <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- Checkout Section -->
+<div class="container mt-5 mb-5">
+  <div class="row g-4">
+    <!-- Customer & Shipping Form -->
+    <div class="col-md-6">
+      <h3 class="mb-3">🧍 Customer Details</h3>
+      <div class="form-box">
+        <form id="orderForm" method="POST" action="/place_order">
+          <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" name="name" required value="{{ user.name if user else '' }}">
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" required value="{{ user.email if user else '' }}">
+          </div>
+          <div class="mb-3">
+            <label for="phone" class="form-label">Phone Number</label>
+            <input type="text" class="form-control" id="phone" name="phone" required value="{{ user.phone if user else '' }}">
+          </div>
+
+          <h5 class="mt-4">📦 Shipping Address</h5>
+          <div class="mb-3">
+            <label for="address" class="form-label">Street Address</label>
+            <input type="text" class="form-control" id="address" name="address"  required value="{{ user.address if user else '' }}">
+          </div>
+          <div class="mb-3">
+            <label for="city" class="form-label">City</label>
+            <input type="text" class="form-control" id="city" name="city" required value="{{ user.city if user and user.city else '' }}">
+          </div>
+          <div class="mb-3">
+            <label for="state" class="form-label">State / Province</label>
+            <input type="text" class="form-control" id="state" name="state" required value="{{ user.state if user and user.state else '' }}">
+          </div>
+          <div class="mb-3">
+            <label for="pincode" class="form-label">Pincode</label>
+            <input type="text" class="form-control" id="pincode" name="pincode" required value="{{ user.pincode if user and user.pincode else '' }}">
+          </div>
+
+
+          <h5 class="mt-4">💳 Payment Method</h5>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="payment" id="cod" value="COD" checked>
+            <label class="form-check-label" for="cod">Cash on Delivery</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="payment" id="upi" value="UPI">
+            <label class="form-check-label" for="upi">UPI</label>
+          </div>
+
+          <button type="submit" class="btn btn-checkout mt-4" id="place-order-btn">Place Order</button>
+        </form>
+
+        <!-- Razorpay Form -->
+        <form id="razorpay-form" action="{{ callback_url }}" method="POST" style="display: none;">
+          <script
+            src="https://checkout.razorpay.com/v1/checkout.js"
+            data-key="{{ key_id }}"
+            data-amount="{{ total|int * 100 }}"
+            data-currency="INR"
+            data-order_id="{{ razorpay_order_id }}"
+            data-buttontext="Pay with UPI"
+            data-name="Puvana's Macrame"
+            data-description="Purchase of handmade products"
+            data-image="{{ url_for('static', filename='images/logo.png') }}"
+            data-prefill.name=""
+            data-prefill.email=""
+            data-theme.color="#b77b57">
+          </script>
+        </form>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-md-6">
+      <h3 class="mb-3">🧾 Order Summary</h3>
+      <div class="summary-box">
+        <ul class="list-group mb-3">
+          {% for item in products %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ item.name }} × {{ item.quantity }}
+            <span>₹{{ item.price * item.quantity }}</span>
+          </li>
+          {% endfor %}
+          <li class="list-group-item d-flex justify-content-between">
+            <strong>Subtotal</strong>
+            <strong>₹{{ subtotal }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            Shipping Fee
+            <span>₹{{ shipping }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <strong>Grand Total</strong>
+            <strong>₹{{ total }}</strong>
+          </li>
+        </ul>
+        <div class="text-muted text-center small">Delivery in 5-7 working days</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="container text-center">
+    <p>© 2024 Puvana's Macrame. All rights reserved.</p>
+    <p>Email: puvanasmacrame@gmail.com</p>
+  </div>
+</footer>
+
+<!-- JS to toggle Razorpay -->
+<script>
+  const paymentRadios = document.querySelectorAll('input[name="payment"]');
+  const razorpayForm = document.querySelector('#razorpay-form');
+  const placeOrderButton = document.querySelector('#place-order-btn');
+
+  function updatePaymentOption() {
+    const selected = document.querySelector('input[name="payment"]:checked').value;
+    if (selected === "UPI") {
+      razorpayForm.style.display = "block";
+      placeOrderButton.style.display = "none";
+    } else {
+      razorpayForm.style.display = "none";
+      placeOrderButton.style.display = "block";
+    }
+  }
+
+  paymentRadios.forEach(radio => {
+    radio.addEventListener('change', updatePaymentOption);
+  });
+
+  updatePaymentOption(); // On page load
+</script>
+
+</body>
+</html>

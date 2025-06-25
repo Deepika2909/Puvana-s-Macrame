@@ -1,0 +1,128 @@
+.navbar-nav .nav-link {
+  font-size: 20px;
+}
+
+.card {
+  border-radius: 20px;        /* Rounded corners */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);  /* Deeper shadow */
+  overflow: hidden;           /* Keeps content within rounded border */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);  /* Hover effect */
+}
+
+.card-img-container {
+  height: 250px; /* consistent image container height */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fefbf8;
+}
+
+.card-img-container img {
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+   border-radius: 20px;
+}
+/* Base Body */
+body {
+  background-color: #fffaf5; /* soft beige */
+  color: #3e3e3e;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #fffaf5;
+  border-bottom: 1px solid #ddd0c8;
+}
+
+.navbar-nav .nav-link {
+  color: #6b2e2e; /* muted maroon */
+  transition: color 0.3s;
+  font-weight: 500;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: #8c2f39; /* dark maroon */
+}
+
+/* Logo Styling (Optional) */
+.navbar-brand img {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.1));
+}
+
+.navbar-brand {
+  color: #8c2f39;
+}
+
+/* Buttons */
+.btn-danger {
+  background-color: #8c2f39; /* deep maroon */
+  border-color: #8c2f39;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #6b2e2e;
+  border-color: #6b2e2e;
+}
+
+/* Section Headings */
+h1, h2 {
+  color: #6b2e2e; /* maroon tone */
+}
+
+/* Cards */
+.card {
+  background-color: #fdf9f5; /* light beige */
+  border: 1px solid #e2d6cd;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* Image Container */
+.card-img-container {
+  height: 10px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #eff5ef; /* subtle green tint */
+}
+
+.card-img-container img {
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Product Title & Price */
+.card-title {
+  color: #6b2e2e;
+  font-weight: 600;
+}
+
+.card-text {
+  color: #3d5a3d; /* dark olive green */
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+/* Footer */
+footer {
+  color: #6b2e2e;
+  font-size: 14px;
+}

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin | Puvana's Macrame</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #b1ecaf;
+            color: #4a3e3e;
+            padding: 40px;
+        }
+        .edit-btn, .delete-btn {
+      margin-right: 5px;
+    }
+    .product-img {
+      max-height: 100px;
+    }
+        .kanban-board {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .kanban-column {
+            flex: 1;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
+            min-height: 400px;
+        }
+        .order-card {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: grab;
+        }
+        .order-card:active {
+            cursor: grabbing;
+        }
+        .order-details {
+            display: none;
+        }
+        .order-card.open .order-details {
+            display: block;
+        }
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+        .nav-tab {
+            background-color: white;
+            border: 2px solid #72b01d;
+            color: #438300;
+            padding: 10px 20px;
+            font-weight: 500;
+            border-radius: 25px;
+            transition: all 0.3s ease-in-out;
+        }
+        .nav-tab:hover {
+            background-color: #b1ecaf;
+            color: #2e4a26;
+            box-shadow: 0 2px 8px rgba(67, 131, 0, 0.2);
+        }
+        .nav-tab.active {
+            background-color: #72b01d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex justify-content-center align-items-center flex-column" style="min-height: 100vh;">
+    <img src="{{ url_for('static', filename='images/head.png') }}" alt="Logo" class="img-fluid mb-4" style="max-height: 150px; width: auto;">
+
+    {% if not show_form %}
+        <div class="card shadow p-4 w-100" style="max-width: 400px; border-radius: 20px;">
+        <h3 class="text-center mb-3">🔐 Admin Login</h3>
+        
+        {% if error %}
+            <div class="alert alert-danger text-center py-2 px-3">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST">
+            <div class="mb-3">
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Login</button>
+        </form>
+    </div>
+</div>
+
+    {% else %}
+        <div class="container">
+            <div class="text-end mb-3">
+    <form action="/logout" method="get" class="d-inline">
+        <button type="submit" class="btn btn-outline-danger btn-sm">🚪 Logout</button>
+    </form>
+</div>
+
+            <div class="nav-tabs-custom mb-4 text-center">
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <button class="btn nav-tab" onclick="showSection('ordersSection')">🧾 Orders</button>
+                    <button class="btn nav-tab" onclick="showSection('addProductForm')">➕ Add Product</button>
+                    <button class="btn nav-tab" onclick="showSection('productsSection')">📦 Existing Products</button>
+                    <button class="btn nav-tab" onclick="showSection('salesSection')">📊 Sales & Profit</button>
+                    <button class="btn nav-tab" onclick="showSection('analysisSection')">📈 Product Analysis</button>
+                </div>
+            </div>
+
+            <div id="ordersSection" class="section-content active">
+                <h4 class="text-center">📦 Manage Orders</h4>
+                <div class="kanban-board">
+                    {% for status, orders in {'pending': orders_pending, 'in_making': orders_making, 'out_for_delivery': orders_delivery}.items() %}
+                    <div class="kanban-column" id="{{ status }}" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <h5>{{ {'pending': '🕓 Pending', 'in_making': '🧶 In Making', 'out_for_delivery': '🚚 Out for Delivery'}[status] }}</h5>
+                        {% for order in orders %}
+                        <div class="order-card" data-order-id="{{ order.id }}" draggable="true" ondragstart="drag(event)" onclick="toggleDetails(this)" id="order-{{ order.id }}">
+                            <strong>Items:</strong>
+                            <ul>
+                                {% for item in order.details %}
+                                    <li>{{ item.name }} × {{ item.quantity or 1 }}</li>
+                                {% endfor %}
+                            </ul>
+                            <div class="order-details">
+                                <p><strong>Customer:</strong> {{ order.name }}</p>
+                                <p><strong>Total:</strong> ₹{{ order.total }}</p>
+                                <p><strong>Address:</strong> {{ order.address }}</p>
+                                <p><strong>Paid:</strong> {{ 'Yes' if order.is_paid else 'No' }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="addProductForm" class="section-content">
+                <div class="bg-light p-4 rounded">
+                    <h4 class="text-center">🧵 Add New Product</h4>
+                    <form method="POST" enctype="multipart/form-data">
+                        <select name="category" class="form-select mb-3" required>
+                            <option value="Plant">Plant</option>
+                            <option value="Walls">Walls</option>
+                            <option value="Essentials">Essentials</option>
+                            <option value="Stores">Stores</option>
+                            <option value="Gifts">Gifts</option>
+                        </select>
+                        <input type="text" name="name" placeholder="Product Name" class="form-control mb-3" required>
+                        <input type="number" name="price" placeholder="Price" step="0.01" class="form-control mb-3" required>
+                        <input type="file" name="image" accept="image/*" class="form-control mb-3" required>
+                        <textarea name="description" placeholder="Description" rows="4" class="form-control mb-3" required></textarea>
+                        <button type="submit" class="btn btn-success w-100">➕ Add Product</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="productsSection" class="section-content">
+        <h4 class="text-center">📦 Product Catalog</h4>
+        <div class="text-center mb-3">
+            <input type="text" id="productSearch" class="form-control w-50 mx-auto" placeholder="🔍 Search by product name..." onkeyup="filterProducts()">
+        </div>
+
+        {% if products %}
+        <div class="table-responsive">
+            <table class="table table-bordered" id="productTable">
+                <thead class="table-success">
+                    <tr>
+                        <th>Image</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price (₹)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td class="text-center"><img src="{{ product.image }}" alt="{{ product.name }}" style="max-height: 100px;" class="rounded"></td>
+                        <td>{{ product.id }}</td>
+                        <td class="product-name">{{ product.name }}</td>
+                        <td>₹{{ product.price }}</td>
+                        <td>
+    <button class="btn btn-warning btn-sm" onclick='editProduct({{ product | tojson | safe }})'>Edit</button>
+<form method="POST" action="/delete_product" style="display:inline;">
+    <input type="hidden" name="id" value="{{ product.id }}">
+    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+</form>
+
+</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="text-center">No products available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Edit Modal -->
+   <!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editProductForm" class="modal-content" method="POST" action="/edit_product" enctype="multipart/form-data">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id" id="edit-id">
+        <div class="mb-3">
+          <label for="edit-name" class="form-label">Product Name</label>
+          <input type="text" class="form-control" name="name" id="edit-name" required>
+        </div>
+        <div class="mb-3">
+          <label for="edit-price" class="form-label">Price</label>
+          <input type="number" class="form-control" name="price" id="edit-price" required>
+        </div>
+        <div class="mb-3">
+          <label for="edit-description" class="form-label">Description</label>
+          <textarea class="form-control" name="description" id="edit-description" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="edit-image" class="form-label">New Image (optional)</label>
+          <input type="file" class="form-control" name="image" id="edit-image" accept="image/*">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Update Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+            <div id="salesSection" class="section-content">
+                <h4 class="text-center">📊 Sales & Profit Analysis</h4>
+                <p class="text-center">(Chart goes here)</p>
+            </div>
+
+            <div id="analysisSection" class="section-content">
+                <h4 class="text-center">📈 Product Analysis</h4>
+                <p class="text-center">(Chart goes here)</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <script>
+        function showSection(id) {
+            const allSections = ['ordersSection', 'addProductForm', 'productsSection', 'salesSection', 'analysisSection'];
+            const buttons = document.querySelectorAll('.nav-tab');
+            allSections.forEach(s => document.getElementById(s).classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const card = document.getElementById(data);
+            const newStatus = ev.target.closest(".kanban-column").id;
+            const orderId = card.getAttribute("data-order-id");
+            if (!orderId || !newStatus) return;
+            if (confirm(`Move this order to '${newStatus.replaceAll("_", " ")}'?`)) {
+                ev.target.closest(".kanban-column").appendChild(card);
+                fetch("/update_order_status", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ order_id: orderId, new_status: newStatus })
+                }).then(res => res.json())
+                .then(data => alert(data.message || "Status updated."))
+                .catch(err => console.error("Error updating status", err));
+            }
+        }
+
+        function toggleDetails(card) {
+            card.classList.toggle("open");
+        }
+
+        function filterProducts() {
+            const input = document.getElementById("productSearch").value.toLowerCase();
+            document.querySelectorAll("#productTable tbody tr").forEach(row => {
+                const name = row.querySelector(".product-name").textContent.toLowerCase();
+                row.style.display = name.includes(input) ? "" : "none";
+            });
+        }
+        function editProduct(product) {
+  const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+  document.getElementById('edit-id').value = product.id;
+  document.getElementById('edit-name').value = product.name;
+  document.getElementById('edit-price').value = product.price;
+  document.getElementById('edit-description').value = product.description;
+  modal.show();
+        }
+
+        function deleteProduct(productId) {
+            if (confirm("Are you sure you want to delete this product?")) {
+                fetch(`/delete_product/${productId}`, {
+                    method: "POST"
+                }).then(() => location.reload());
+            }
+        }
+    </script>
+</body>
+</html>
