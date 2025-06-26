@@ -326,6 +326,7 @@ def place_order():
     if 'user_id' not in session:
         flash("Please log in first.")
         return redirect('/user')
+
     name = request.form['name']
     email = request.form['email']
     phone = request.form['phone']
@@ -336,10 +337,13 @@ def place_order():
     payment_method = request.form.get('payment', 'COD')
 
     cart = session.get('cart', {})
-    products = get_cart_products(cart)
-    total = sum(item['subtotal'] for item in products) + 70
+    products = get_cart_products(cart)  # Your function to fetch product info
+    subtotal = sum(item['subtotal'] for item in products)
+    shipping_fee = 70
+    total = subtotal + shipping_fee
     order_details = json.dumps(products)
 
+    # Insert into Supabase
     supabase.table('orders').insert({
         "name": name,
         "email": email,
@@ -354,6 +358,45 @@ def place_order():
         "status": "pending"
     }).execute()
 
+    # Format product details
+    product_lines = "\n".join([
+        f"- {item['name']} × {item['quantity']} = ₹{item['subtotal']}"
+        for item in products
+    ])
+
+    # Email body content
+    email_body = f"""
+🧾 New Order Received!
+
+👤 Customer:
+Name: {name}
+Email: {email}
+Phone: {phone}
+
+🏠 Address:
+{street_address}, {city}, {state} - {pincode}
+
+💳 Payment Method: {payment_method}
+
+📦 Order Summary:
+{product_lines}
+
+Subtotal: ₹{subtotal}
+Shipping: ₹{shipping_fee}
+Grand Total: ₹{total}
+    """
+
+    # Send email
+    try:
+        msg = Message(subject="🧾 New Order Received - Puvana's Macrame",
+                      sender='your_email@gmail.com',  # Replace
+                      recipients=['puvanasmacrame@gmail.com'],
+                      body=email_body)
+        mail.send(msg)
+    except Exception as e:
+        print("Mail sending failed:", e)
+
+    # Clear cart
     session.pop('cart', None)
     return redirect('/thank_you')
 

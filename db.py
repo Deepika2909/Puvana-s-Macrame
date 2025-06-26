@@ -4,6 +4,7 @@ import sqlite3
 conn = sqlite3.connect('products.db')
 c = conn.cursor()
 
+
 c.execute('''CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY,
     category TEXT, 
