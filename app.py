@@ -389,7 +389,7 @@ Grand Total: ₹{total}
     # Send email
     try:
         msg = Message(subject="🧾 New Order Received - Puvana's Macrame",
-                      sender='your_email@gmail.com',  # Replace
+                      sender='puvanasmacrame@gmail.com',  # Replace
                       recipients=['puvanasmacrame@gmail.com'],
                       body=email_body)
         mail.send(msg)
