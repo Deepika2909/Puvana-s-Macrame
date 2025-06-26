@@ -283,8 +283,6 @@ def cart():
             cart_items.append(product)
     return render_template('cart.html', products=cart_items, total=total)
 
-from supabase import create_client
-
 # Supabase setup
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
