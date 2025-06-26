@@ -13,9 +13,9 @@ from email.message import EmailMessage
 from decimal import Decimal
 from datetime import timedelta, datetime
 from collections import defaultdict
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import io
-
+from supabase import create_client
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
@@ -77,18 +77,18 @@ def sales_chart(period):
     dates = sorted(daily_sales.keys())
     values = [daily_sales[date] for date in dates]
 
-    plt.figure(figsize=(8, 4))
-    plt.plot(dates, values, marker='o', color='green')
-    plt.title(f"Sales Trend ({period})")
-    plt.xlabel("Date")
-    plt.ylabel("Total Money (₹)")
-    plt.xticks(rotation=45)
-    plt.tight_layout()
+    # plt.figure(figsize=(8, 4))
+    # plt.plot(dates, values, marker='o', color='green')
+    # plt.title(f"Sales Trend ({period})")
+    # plt.xlabel("Date")
+    # plt.ylabel("Total Money (₹)")
+    # plt.xticks(rotation=45)
+    # plt.tight_layout()
 
-    img = io.BytesIO()
-    plt.savefig(img, format="png")
-    img.seek(0)
-    return send_file(img, mimetype="image/png")
+    # img = io.BytesIO()
+    # plt.savefig(img, format="png")
+    # img.seek(0)
+    return send_file( mimetype="image/png")
 
 @app.route("/store_session", methods=["POST"])
 def store_session():
@@ -227,15 +227,15 @@ def product_chart(period):
     labels = [row[0] for row in data]
     values = [row[1] for row in data]
 
-    # Pie chart
-    fig, ax = plt.subplots()
-    ax.pie(values, labels=labels, autopct='%1.1f%%')
-    ax.set_title("Product Distribution")
+    # # Pie chart
+    # fig, ax = plt.subplots()
+    # ax.pie(values, labels=labels, autopct='%1.1f%%')
+    # ax.set_title("Product Distribution")
 
-    img = io.BytesIO()
-    plt.savefig(img, format="png")
-    img.seek(0)
-    return send_file(img, mimetype="image/png")
+    # img = io.BytesIO()
+    # plt.savefig(img, format="png")
+    # img.seek(0)
+    return send_file( mimetype="image/png")
 
 @app.route('/product/<int:product_id>')
 def product(product_id):
