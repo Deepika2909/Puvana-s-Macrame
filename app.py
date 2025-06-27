@@ -197,6 +197,10 @@ def home():
 
     return render_template("home.html", user=name)
 
+@app.route("/terms-and-conditions")
+def terms_and_conditions():
+    return render_template("terms_and_conditions.html")
+
 @app.route("/shop")
 def shop():
     category = request.args.get('category', 'All')
