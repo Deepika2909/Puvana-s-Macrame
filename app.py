@@ -404,34 +404,8 @@ Grand Total: ₹{total}
 
 @app.route('/payment_success', methods=['POST'])
 def payment_success():
-    try:
-        cart = session.get('cart', {})
-        if not cart:
-            return "❌ Cart is empty or session expired", 400
+    return render_template('payment_success.html')
 
-        products = get_cart_products(cart)
-        total = sum(item['subtotal'] for item in products)
-        items_summary = ", ".join([f"{item['name']} x{item['quantity']}" for item in products])
-
-        user = session.get('user')
-        customer_name = user if isinstance(user, str) else user.get('name', 'Guest')
-
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO orders (customer_name, items, total) VALUES (%s, %s, %s)",
-            (customer_name, items_summary, total)
-        )
-        conn.commit()
-        conn.close()
-
-        session.pop('cart', None)
-
-        return render_template('payment_success.html', name=customer_name)
-
-    except Exception as e:
-        print("❌ Payment success error:", e)
-        return "Internal Server Error", 500
 
 @app.route("/about")
 def about():
