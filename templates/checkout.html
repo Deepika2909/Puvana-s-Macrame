@@ -129,19 +129,21 @@
         <!-- Razorpay Form -->
         <form id="razorpay-form" action="{{ callback_url }}" method="POST" style="display: none;">
           <script
-            src="https://checkout.razorpay.com/v1/checkout.js"
-            data-key="{{ key_id }}"
-            data-amount="{{ total|int * 100 }}"
-            data-currency="INR"
-            data-order_id="{{ razorpay_order_id }}"
-            data-buttontext="Pay with UPI"
-            data-name="Puvana's Macrame"
-            data-description="Purchase of handmade products"
-            data-image="{{ url_for('static', filename='images/logo.png') }}"
-            data-prefill.name=""
-            data-prefill.email=""
-            data-theme.color="#b77b57">
-          </script>
+  src="https://checkout.razorpay.com/v1/checkout.js"
+  data-key="{{ key_id }}"
+  data-amount="{{ total|int * 100 }}"
+  data-currency="INR"
+  data-order_id="{{ razorpay_order_id }}"
+  data-buttontext="Pay with UPI"
+  data-name="Puvana's Macrame"
+  data-description="Purchase of handmade products"
+  data-image="{{ url_for('static', filename='images/logo.png') }}"
+  data-callback_url="{{ url_for('payment_success') }}"
+  data-prefill.name=""
+  data-prefill.email=""
+  data-theme.color="#b77b57">
+</script>
+
         </form>
       </div>
     </div>

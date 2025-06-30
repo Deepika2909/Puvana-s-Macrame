@@ -437,7 +437,6 @@ def payment_success():
         print("❌ Payment success error:", e)
         return "Internal Server Error", 500
 
-
 @app.route("/about")
 def about():
     return render_template("about.html")
