@@ -442,8 +442,12 @@ Grand Total: ₹{total}
 
     # Clear cart
     
-    session.pop('cart', None)
+    if payment_method == 'COD':
+        session.pop('cart', None)
+        session.pop('order_customer', None)
+
     return redirect('/thank_you')
+
 @app.route('/simulate_payment_success')
 def simulate_payment_success():
     print("🧪 Simulating payment success with dummy session and form data")
@@ -456,7 +460,7 @@ def simulate_payment_success():
             }
             sess['user_id'] = 1  # make sure this user exists in Supabase
             sess['order_customer'] = {
-                'name': 'Deepika N',
+                'name': 'kodesh',
                 'email': 'deepikashrin@gmail.com',
                 'phone': '9496392884',
                 'address': '6/673-8, Pandiyan Street, Lakshmi Nagar, Virudhunagar'
@@ -474,7 +478,6 @@ def simulate_payment_success():
         return response.data.decode()
 
 
-
 @app.route('/payment_success', methods=['POST'])
 def payment_success():
     try:
@@ -483,36 +486,29 @@ def payment_success():
         razorpay_order_id = request.form.get('razorpay_order_id')
         print("📦 Razorpay Order ID:", razorpay_order_id)
 
-        # Get form data
-        order_customer = session.get('order_customer', {})
-        customer_name = order_customer.get('name')
-        customer_email = order_customer.get('email')
-        customer_phone = order_customer.get('phone')
-        street = order_customer.get('address')
-
-
-        print("👤 Name:", customer_name)
-        print("📧 Email:", customer_email)
-        print("📱 Phone:", customer_phone)
-        print("🏠 Street Address:", street)
-
         cart = session.get('cart', {})
-        print("🛒 Cart contents:", cart)
         if not cart:
             print("❌ Cart is empty or session expired")
             return "❌ Cart is empty or session expired", 400
 
+        # ✅ Get customer data from session (not from form)
+        customer = session.get('order_customer', {})
+        customer_name = customer.get('name')
+        customer_email = customer.get('email')
+        customer_phone = customer.get('phone')
+        street = customer.get('address')
+
+        print("👤 Name:", customer_name)
+        print("📧 Email:", customer_email)
+        print("📱 Phone:", customer_phone)
+        print("🏠 Address:", street)
+
+        # Get product details
         products = get_cart_products(cart)
-        print("🧾 Products fetched from cart:", products)
-
         total = sum(item['subtotal'] for item in products)
-        print("💰 Total amount:", total)
-
         items_summary = ", ".join([f"{item['name']} x{item['quantity']}" for item in products])
-        print("📑 Items summary:", items_summary)
 
-        # Insert into DB (removed city, state, pincode)
-        print("📝 Inserting order into DB...")
+        # Insert order into DB
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -547,8 +543,9 @@ def payment_success():
         conn.close()
         print("✅ Order successfully inserted into DB.")
 
+        # ✅ Clear session
         session.pop('cart', None)
-        print("🧹 Cleared cart from session.")
+        session.pop('order_customer', None)
 
         return render_template('payment_success.html', name=customer_name)
 
@@ -557,6 +554,8 @@ def payment_success():
         print("❌ Payment success error:")
         traceback.print_exc()
         return "Internal Server Error", 500
+
+
 
 
 
