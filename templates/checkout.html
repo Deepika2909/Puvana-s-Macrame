@@ -139,8 +139,8 @@
   data-description="Purchase of handmade products"
   data-image="{{ url_for('static', filename='images/logo.png') }}"
   data-callback_url="{{ url_for('payment_success') }}"
-  data-prefill.name=""
-  data-prefill.email=""
+  data-prefill.name="{{ user.name }}"
+  data-prefill.email="{{ user.email }}"
   data-theme.color="#b77b57">
 </script>
 

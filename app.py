@@ -297,31 +297,64 @@ def get_user_by_id(user_id):
     result = supabase.table("users").select("*").eq("id", user_id).single().execute()
     return result.data if result.data else None
 
-@app.route('/checkout', methods=['GET'])
-def checkout():
-    cart = session.get('cart', {})
-    products = get_cart_products(cart)
-    subtotal = sum(item['subtotal'] for item in products)
-    shipping = 70
-    total = subtotal + shipping
+# @app.route('/payment_success', methods=['POST'])
+# def payment_success():
+#     try:
+#         print("✅ Entered payment_success route")
 
-    razorpay_order = razorpay_client.order.create(dict(
-        amount=total * 100, currency="INR", payment_capture='1'))
-    razorpay_order_id = razorpay_order['id']
-    callback_url = "/payment_success"
+#         # Get Razorpay data from POST (sent automatically by Razorpay)
+#         razorpay_order_id = request.form.get('razorpay_order_id')
+#         print("📦 Razorpay Order ID:", razorpay_order_id)
 
-    # ✅ Fetch user data from Supabase using session['user_id']
-    user = get_user_by_id(session['user_id']) if 'user_id' in session else None
-    print("User ID in session:", session.get('user_id'))
-    return render_template('checkout.html',
-                           products=products,
-                           subtotal=subtotal,
-                           shipping=shipping,
-                           total=total,
-                           razorpay_order_id=razorpay_order_id,
-                           key_id=os.getenv("RAZORPAY_KEY"),
-                           callback_url=callback_url,
-                           user=user)
+#         # Check cart session
+#         cart = session.get('cart', {})
+#         print("🛒 Cart contents:", cart)
+#         if not cart:
+#             print("❌ Cart is empty or session expired")
+#             return "❌ Cart is empty or session expired", 400
+
+#         # Get cart products and compute total
+#         products = get_cart_products(cart)
+#         print("🧾 Products fetched from cart:", products)
+
+#         total = sum(item['subtotal'] for item in products)
+#         print("💰 Total amount:", total)
+
+#         items_summary = ", ".join([f"{item['name']} x{item['quantity']}" for item in products])
+#         print("📑 Items summary:", items_summary)
+
+#         # Get user info
+#         user = get_user_by_id(session['user_id']) if 'user_id' in session else None
+#         print("👤 User object:", user)
+
+#         customer_name = user.get("name", "Guest") if user else "Guest"
+#         customer_email = user.get("email", None) if user else None
+#         print("👤 Name:", customer_name)
+#         print("📧 Email:", customer_email)
+
+#         # Insert successful order
+#         print("📝 Inserting order into DB...")
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         cursor.execute(
+#             "INSERT INTO orders (razorpay_order_id, name, email, order_details, is_paid) VALUES (%s, %s, %s, %s, %s)",
+#             (razorpay_order_id, customer_name, customer_email, items_summary, True)
+#         )
+#         conn.commit()
+#         conn.close()
+#         print("✅ Order successfully inserted into DB.")
+
+#         session.pop('cart', None)
+#         print("🧹 Cleared cart from session.")
+
+#         return render_template('payment_success.html', name=customer_name)
+
+#     except Exception as e:
+#         import traceback
+#         print("❌ Payment success error:")
+#         traceback.print_exc()
+#         return "Internal Server Error", 500
+
 
 @app.route('/place_order', methods=['POST'])
 def place_order():
@@ -402,40 +435,242 @@ Grand Total: ₹{total}
     session.pop('cart', None)
     return redirect('/thank_you')
 
-@app.route('/payment_success', methods=['GET', 'POST'])
+@app.route('/payment_success', methods=['POST'])
 def payment_success():
     try:
         print("✅ Entered payment_success route")
 
-        cart = session.get('cart', {})
-        print("Cart:", cart)
+        # Get Razorpay data from POST (sent automatically by Razorpay)
+        razorpay_order_id = request.form.get('razorpay_order_id')
+        print("📦 Razorpay Order ID:", razorpay_order_id)
 
+        # Check cart session
+        cart = session.get('cart', {})
+        print("🛒 Cart contents:", cart)
         if not cart:
+            print("❌ Cart is empty or session expired")
             return "❌ Cart is empty or session expired", 400
 
+        # Get cart products and compute total
         products = get_cart_products(cart)
+        print("🧾 Products fetched from cart:", products)
+
         total = sum(item['subtotal'] for item in products)
+        print("💰 Total amount:", total)
+
         items_summary = ", ".join([f"{item['name']} x{item['quantity']}" for item in products])
+        print("📑 Items summary:", items_summary)
 
-        user = session.get('user')
-        customer_name = user if isinstance(user, str) else user.get('name', 'Guest')
+        # Get user info
+        user = get_user_by_id(session['user_id']) if 'user_id' in session else None
+        print("👤 User object:", user)
 
+        customer_name = user.get("name", "Guest") if user else "Guest"
+        customer_email = user.get("email", None) if user else None
+        print("👤 Name:", customer_name)
+        print("📧 Email:", customer_email)
+
+        # Insert successful order
+        print("📝 Inserting order into DB...")
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO orders (customer_name, items, total) VALUES (%s, %s, %s)",
-            (customer_name, items_summary, total)
+            "INSERT INTO orders (razorpay_order_id, name, email, order_details, is_paid) VALUES (%s, %s, %s, %s, %s)",
+            (razorpay_order_id, customer_name, customer_email, items_summary, True)
         )
         conn.commit()
         conn.close()
+        print("✅ Order successfully inserted into DB.")
 
         session.pop('cart', None)
+        print("🧹 Cleared cart from session.")
 
         return render_template('payment_success.html', name=customer_name)
 
     except Exception as e:
-        print("❌ Payment success error:", e)
+        import traceback
+        print("❌ Payment success error:")
+        traceback.print_exc()
         return "Internal Server Error", 500
+
+@app.route('/checkout', methods=['GET'])
+def checkout():
+    cart = session.get('cart', {})
+    products = get_cart_products(cart)
+    subtotal = sum(item['subtotal'] for item in products)
+    shipping = 70
+    total = subtotal + shipping
+
+    razorpay_order = razorpay_client.order.create(dict(
+        amount=total * 100, currency="INR", payment_capture='1'))
+    razorpay_order_id = razorpay_order['id']
+    callback_url = "/payment_success"
+
+    # ✅ Fetch user data from Supabase using session['user_id']
+    user = get_user_by_id(session['user_id']) if 'user_id' in session else None
+    print("User ID in session:", session.get('user_id'))
+    return render_template('checkout.html',
+                           products=products,
+                           subtotal=subtotal,
+                           shipping=shipping,
+                           total=total,
+                           razorpay_order_id=razorpay_order_id,
+                           key_id=os.getenv("RAZORPAY_KEY"),
+                           callback_url=callback_url,
+                           user=user)
+# @app.route('/checkout', methods=['GET'])
+# def checkout():
+#     cart = session.get('cart', {})
+#     products = get_cart_products(cart)
+#     subtotal = sum(item['subtotal'] for item in products)
+#     shipping = 70
+#     total = subtotal + shipping
+
+#     razorpay_order = razorpay_client.order.create(dict(
+#         amount=total * 100, currency="INR", payment_capture='1'))
+#     razorpay_order_id = razorpay_order['id']
+#     callback_url = "/payment_success"
+
+#     # Fetch user details
+#     user = get_user_by_id(session['user_id']) if 'user_id' in session else None
+
+#     name = user.get("name", "Guest") if user else "Guest"
+#     email = user.get("email") if user and user.get("email") else ""
+#     phone = user.get("phone") if user and user.get("phone") else ""
+#     street_address = user.get("street_address") if user and user.get("street_address") else ""
+#     city = user.get("city") if user and user.get("city") else ""
+#     state = user.get("state") if user and user.get("state") else ""
+#     pincode = user.get("pincode") if user and user.get("pincode") else ""
+
+#     items_summary = ", ".join([f"{item['name']} x{item['quantity']}" for item in products])
+
+#     # ✅ Print all the data before inserting
+#     print("📝 Inserting Order:")
+#     print("Order ID:", razorpay_order_id)
+#     print("Name:", name)
+#     print("Email:", email)
+#     print("Phone:", phone)
+#     print("Street:", street_address)
+#     print("City:", city)
+#     print("State:", state)
+#     print("Pincode:", pincode)
+#     print("Items:", items_summary)
+
+#     conn = get_connection()
+#     cursor = conn.cursor()
+#     cursor.execute("""
+#         INSERT INTO orders (
+#             razorpay_order_id, name, email, phone, street_address, city, state, pincode,
+#             order_details, is_paid
+#         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+#     """, (
+#         razorpay_order_id, name, email, phone, street_address, city, state, pincode,
+#         items_summary, False
+#     ))
+
+#     conn.commit()
+#     conn.close()
+
+#     return render_template('checkout.html',
+#                            products=products,
+#                            subtotal=subtotal,
+#                            shipping=shipping,
+#                            total=total,
+#                            razorpay_order_id=razorpay_order_id,
+#                            key_id=os.getenv("RAZORPAY_KEY"),
+#                            callback_url=callback_url,
+#                            user=user)
+# @app.route('/payment_success', methods=['GET', 'POST'])
+# def payment_success():
+#     try:
+#         print("✅ Entered payment_success route")
+
+#         cart = session.get('cart', {})
+#         print("Cart:", cart)
+
+#         if not cart:
+#             return "❌ Cart is empty or session expired", 400
+
+#         products = get_cart_products(cart)
+#         total = sum(item['subtotal'] for item in products)
+#         items_summary = ", ".join([f"{item['name']} x{item['quantity']}" for item in products])
+
+#         user = session.get('user')
+#         customer_name = user if isinstance(user, str) else user.get('name', 'Guest')
+
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         cursor.execute(
+#             "INSERT INTO orders (customer_name, items, total) VALUES (%s, %s, %s)",
+#             (customer_name, items_summary, total)
+#         )
+#         conn.commit()
+#         conn.close()
+
+#         session.pop('cart', None)
+
+#         return render_template('payment_success.html', name=customer_name)
+
+#     except Exception as e:
+#         print("❌ Payment success error:", e)
+#         return "Internal Server Error", 500
+
+# @app.route('/payment_success', methods=['GET', 'POST'])
+# def payment_success():
+#     try:
+#         print("✅ Entered payment_success route")
+
+#         cart = session.get('cart', {})
+#         print("Cart:", cart)
+
+#         if not cart:
+#             print("⚠️ Empty cart. Creating dummy fallback.")
+#             cart = {}
+
+#         products = get_cart_products(cart)
+#         print("Products:", products)
+
+#         total = sum(item['subtotal'] for item in products)
+#         items_summary = ", ".join([f"{item['name']} x{item['quantity']}" for item in products])
+
+#         user_id = session.get("user_id")
+#         name = None
+
+#         if user_id:
+#             response = supabase.table("users").select("name").eq("id", user_id).execute()
+#             if response.data:
+#                 name = response.data[0]['name']
+#             else:
+#                 response = supabase.table("oauth_users").select("name").eq("id", user_id).execute()
+#                 if response.data:
+#                     name = response.data[0]['name']
+
+#         if not name:
+#             name = "Guest"
+            
+
+#         print("Final Customer Name:", name)
+
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         cursor.execute(
+#             "INSERT INTO orders (name, order_details, is_paid) VALUES (%s, %s, %s)",
+#             (name, items_summary, True)
+#         )
+#         conn.commit()
+#         conn.close()
+
+#         session.pop('cart', None)
+
+#         return render_template('payment_success.html', name=name)
+
+#     except Exception as e:
+#         import traceback
+#         print("❌ Payment success error:")
+#         traceback.print_exc()
+#         return "Internal Server Error", 500
+
+
 
 @app.route("/about")
 def about():
