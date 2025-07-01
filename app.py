@@ -1040,11 +1040,15 @@ def profile():
     orders = order_response.data if order_response.data else []
 
     # 🧾 Parse order_details safely
+    
     for order in orders:
         try:
             order["details"] = json.loads(order["order_details"])
         except Exception:
             order["details"] = []
+            print("Order ID:", order.get("id"))
+            print("Details:", order["details"]) 
+
 
     return render_template("profile.html", user=user, orders=orders)
 
