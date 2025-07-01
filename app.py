@@ -382,7 +382,7 @@ def place_order():
     cart = session.get('cart', {})
     products = get_cart_products(cart)  # Your function to fetch product info
     subtotal = sum(item['subtotal'] for item in products)
-    shipping_fee = 70
+    shipping_fee = 0
     total = subtotal + shipping_fee
     order_details = json.dumps(products)
     
@@ -567,7 +567,7 @@ def checkout():
     cart = session.get('cart', {})
     products = get_cart_products(cart)
     subtotal = sum(item['subtotal'] for item in products)
-    shipping = 70
+    shipping = 0
     total = subtotal + shipping
 
     razorpay_order = razorpay_client.order.create(dict(
