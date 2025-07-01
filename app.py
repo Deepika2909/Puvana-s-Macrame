@@ -382,13 +382,24 @@ def place_order():
             return redirect('/cart')
 
         subtotal = sum(item['subtotal'] for item in products)
-        total = subtotal  # No shipping
+        total = subtotal
         order_details = json.dumps(products)
 
-        # Store for Razorpay success callback
+        # Generate Razorpay order_id if payment is UPI
+        razorpay_order_id = None
+        if payment_method == "UPI":
+            razorpay_order = razorpay_client.order.create(dict(
+                amount=total * 100,
+                currency="INR",
+                payment_capture='1'
+            ))
+            razorpay_order_id = razorpay_order['id']
+            session['razorpay_order_id'] = razorpay_order_id 
+
+        # Save user email for lookup
         session['latest_email'] = email
 
-        # Store order in DB
+        # Save order in DB with razorpay_order_id (if UPI)
         supabase.table('orders').insert({
             "name": name,
             "email": email,
@@ -397,7 +408,8 @@ def place_order():
             "order_details": order_details,
             "total_money": total,
             "is_paid": payment_method == "COD",
-            "status": "pending"
+            "status": "pending",
+            "razorpay_order_id": razorpay_order_id or None
         }).execute()
 
         if payment_method == 'COD':
@@ -406,7 +418,7 @@ def place_order():
             flash("✅ Order placed with Cash on Delivery.")
             return redirect('/thank_you')
         else:
-            return redirect('/checkout')  # Razorpay flow
+            return redirect('/checkout')  # Razorpay payment flow
 
     except Exception as e:
         import traceback
