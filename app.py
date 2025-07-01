@@ -354,12 +354,10 @@ def get_user_by_id(user_id):
 #         print("❌ Payment success error:")
 #         traceback.print_exc()
 #         return "Internal Server Error", 500
-
 @app.route('/place_order', methods=['POST'])
 def place_order():
     if 'user_id' not in session:
-        flash("Please log in first.")
-        return redirect('/user')
+        return jsonify({"status": "fail", "message": "Login required"}), 401
 
     try:
         name = request.form['name']
@@ -373,34 +371,28 @@ def place_order():
 
         cart = session.get('cart', {})
         if not cart:
-            flash("❌ Your cart is empty.")
-            return redirect('/cart')
+            return jsonify({"status": "fail", "message": "Cart is empty"}), 400
 
         products = get_cart_products(cart)
         if not products:
-            flash("❌ No products found in cart.")
-            return redirect('/cart')
+            return jsonify({"status": "fail", "message": "No products in cart"}), 400
 
         subtotal = sum(item['subtotal'] for item in products)
         total = subtotal
         order_details = json.dumps(products)
 
-        # Generate Razorpay order_id if payment is UPI
         razorpay_order_id = None
         if payment_method == "UPI":
-            razorpay_order = razorpay_client.order.create(dict(
-                amount=total * 100,
-                currency="INR",
-                payment_capture='1'
-            ))
+            razorpay_order = razorpay_client.order.create({
+                "amount": total * 100,
+                "currency": "INR",
+                "payment_capture": '1'
+            })
             razorpay_order_id = razorpay_order['id']
-            session['razorpay_order_id'] = razorpay_order_id 
 
-        # Save user email for lookup
         session['latest_email'] = email
 
-        # Save order in DB with razorpay_order_id (if UPI)
-        supabase.table('orders').insert({
+        response = supabase.table('orders').insert({
             "name": name,
             "email": email,
             "phone": phone,
@@ -412,19 +404,26 @@ def place_order():
             "razorpay_order_id": razorpay_order_id or None
         }).execute()
 
-        if payment_method == 'COD':
+        if payment_method == "COD":
             session.pop('cart', None)
             session.pop('latest_email', None)
-            flash("✅ Order placed with Cash on Delivery.")
             return redirect('/thank_you')
         else:
-            return redirect('/checkout')  # Razorpay payment flow
+            return jsonify({
+                "status": "ok",
+                "razorpay_order_id": razorpay_order_id,
+                "amount": total * 100,
+                "key_id": os.getenv("RAZORPAY_KEY"),
+                "name": name,
+                "email": email,
+                "image": url_for('static', filename='images/logo.png')
+            })
 
     except Exception as e:
         import traceback
         traceback.print_exc()
-        flash("❌ Something went wrong while placing the order.")
-        return redirect('/cart')
+        return jsonify({"status": "fail", "message": "Server error"}), 500
+
 
 
 @app.route('/simulate_payment_success')

@@ -113,10 +113,10 @@
             <label class="form-check-label" for="upi">UPI</label>
           </div>
 
-          <button type="submit" class="btn btn-checkout mt-4" id="place-order-btn">Place Order</button>
+          <button type="button" class="btn btn-checkout mt-4" id="place-order-btn">Place Order</button>
+
         </form>
 
-        <!-- Razorpay Form -->
         <!-- Razorpay Form -->
 <form id="razorpay-form" action="{{ callback_url }}" method="POST">
   <script
@@ -134,6 +134,7 @@
     data-prefill.email="{{ user.email }}"
     data-theme.color="#b77b57">
   </script>
+  
 </form>
 
 
@@ -181,27 +182,55 @@
 
 <!-- JS to toggle Razorpay -->
 <script>
+  const form = document.getElementById("orderForm");
   const paymentRadios = document.querySelectorAll('input[name="payment"]');
-  const razorpayForm = document.querySelector('#razorpay-form');
   const placeOrderButton = document.querySelector('#place-order-btn');
 
-  function updatePaymentOption() {
-    const selected = document.querySelector('input[name="payment"]:checked').value;
-    if (selected === "UPI") {
-      razorpayForm.style.display = "block";
-      placeOrderButton.style.display = "none";
-    } else {
-      razorpayForm.style.display = "none";
-      placeOrderButton.style.display = "block";
+  placeOrderButton.addEventListener("click", async function () {
+    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+    const formData = new FormData(form);
+    formData.append("payment", paymentMethod);
+
+    if (paymentMethod === "COD") {
+      form.submit();  // normal flow
+    } else if (paymentMethod === "UPI") {
+      // 👇 Call /place_order via AJAX
+      const response = await fetch("/place_order", {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.status === "ok") {
+        // 🔁 Razorpay flow
+        const options = {
+          key: result.key_id,
+          amount: result.amount,
+          currency: "INR",
+          name: "Puvana's Macrame",
+          description: "Purchase of handmade products",
+          image: result.image,
+          order_id: result.razorpay_order_id,
+          callback_url: "/payment_success",
+          prefill: {
+            name: result.name,
+            email: result.email
+          },
+          theme: {
+            color: "#b77b57"
+          }
+        };
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } else {
+        alert("❌ Failed to place order: " + result.message);
+      }
     }
-  }
-
-  paymentRadios.forEach(radio => {
-    radio.addEventListener('change', updatePaymentOption);
   });
-
-  updatePaymentOption(); // On page load
 </script>
+
 
 </body>
 </html>
