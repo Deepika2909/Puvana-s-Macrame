@@ -460,7 +460,7 @@ def simulate_payment_success():
             }
             sess['user_id'] = 1  # make sure this user exists in Supabase
             sess['order_customer'] = {
-                'name': 'kodesh',
+                'name': 'jano',
                 'email': 'deepikashrin@gmail.com',
                 'phone': '9496392884',
                 'address': '6/673-8, Pandiyan Street, Lakshmi Nagar, Virudhunagar'
