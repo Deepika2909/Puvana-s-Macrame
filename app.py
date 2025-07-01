@@ -478,35 +478,36 @@ def simulate_payment_success():
         return response.data.decode()
 
 
-@app.route('/payment_success', methods=['POST'])
+@app.route('/payment_success', methods=['POST', 'GET'])
 def payment_success():
     try:
         print("✅ Entered payment_success route")
 
-        razorpay_order_id = request.form.get('razorpay_order_id')
+        # Handle both POST form and GET query params
+        if request.method == "POST":
+            razorpay_order_id = request.form.get('razorpay_order_id')
+        else:
+            razorpay_order_id = request.args.get('razorpay_order_id')
+
         print("📦 Razorpay Order ID:", razorpay_order_id)
+
+        if not razorpay_order_id:
+            return "❌ Razorpay order ID not found", 400
 
         cart = session.get('cart', {})
         if not cart:
             print("❌ Cart is empty or session expired")
             return "❌ Cart is empty or session expired", 400
 
-        # ✅ Get customer data from session (not from form)
         customer = session.get('order_customer', {})
         customer_name = customer.get('name')
         customer_email = customer.get('email')
         customer_phone = customer.get('phone')
         street = customer.get('address')
 
-        print("👤 Name:", customer_name)
-        print("📧 Email:", customer_email)
-        print("📱 Phone:", customer_phone)
-        print("🏠 Address:", street)
-
-        # Get product details
         products = get_cart_products(cart)
         total = sum(item['subtotal'] for item in products)
-        items_summary = ", ".join([f"{item['name']} x{item['quantity']}" for item in products])
+        items_summary = json.dumps(products)  # ✅ Store actual details, not plain string
 
         # Insert order into DB
         conn = get_connection()
@@ -543,7 +544,7 @@ def payment_success():
         conn.close()
         print("✅ Order successfully inserted into DB.")
 
-        # ✅ Clear session
+        # Clear session
         session.pop('cart', None)
         session.pop('order_customer', None)
 
@@ -551,9 +552,9 @@ def payment_success():
 
     except Exception as e:
         import traceback
-        print("❌ Payment success error:")
         traceback.print_exc()
         return "Internal Server Error", 500
+
 
 
 
