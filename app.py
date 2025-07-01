@@ -366,28 +366,21 @@ def place_order():
     email = request.form['email']
     phone = request.form['phone']
     street_address = request.form['address']
-    city = request.form['city']
-    state = request.form['state']
-    pincode = request.form['pincode']
+    city = request.form.get('city', '')
+    state = request.form.get('state', '')
+    pincode = request.form.get('pincode', '')
     payment_method = request.form.get('payment', 'COD')
-    # Add this after inserting into Supabase (before redirect)
-    session['order_customer'] = {
-        "name": name,
-        "email": email,
-        "phone": phone,
-        "address": street_address
-    }
-
 
     cart = session.get('cart', {})
-    products = get_cart_products(cart)  # Your function to fetch product info
+    products = get_cart_products(cart)
     subtotal = sum(item['subtotal'] for item in products)
-    shipping_fee = 0
-    total = subtotal + shipping_fee
+    total = subtotal  # No shipping
     order_details = json.dumps(products)
-    
 
-    # Insert into Supabase
+    # Store for Razorpay success callback
+    session['latest_email'] = email
+
+    # Store order in DB (for both COD and UPI)
     supabase.table('orders').insert({
         "name": name,
         "email": email,
@@ -398,55 +391,17 @@ def place_order():
         "pincode": pincode,
         "order_details": order_details,
         "total_money": total,
-        "is_paid": payment_method == "UPI",
+        "is_paid": payment_method == "COD",
         "status": "pending"
     }).execute()
 
-    # Format product details
-    product_lines = "\n".join([
-        f"- {item['name']} × {item['quantity']} = ₹{item['subtotal']}"
-        for item in products
-    ])
-
-    # Email body content
-    email_body = f"""
-🧾 New Order Received!
-
-👤 Customer:
-Name: {name}
-Email: {email}
-Phone: {phone}
-
-🏠 Address:
-{street_address}, {city}, {state} - {pincode}
-
-💳 Payment Method: {payment_method}
-
-📦 Order Summary:
-{product_lines}
-
-Subtotal: ₹{subtotal}
-Shipping: ₹{shipping_fee}
-Grand Total: ₹{total}
-    """
-
-    # Send email
-    try:
-        msg = Message(subject="🧾 New Order Received - Puvana's Macrame",
-                      sender='puvanasmacrame@gmail.com',  # Replace
-                      recipients=['puvanasmacrame@gmail.com'],
-                      body=email_body)
-        mail.send(msg)
-    except Exception as e:
-        print("Mail sending failed:", e)
-
-    # Clear cart
-    
     if payment_method == 'COD':
         session.pop('cart', None)
-        session.pop('order_customer', None)
+        flash("✅ Order placed with Cash on Delivery.")
+        return redirect('/thank_you')
+    else:
+        return redirect('/checkout')  # Redirect to Razorpay form
 
-    return redirect('/thank_you')
 
 @app.route('/simulate_payment_success')
 def simulate_payment_success():
@@ -477,83 +432,42 @@ def simulate_payment_success():
         print("✅ Simulation complete. Status code:", response.status_code)
         return response.data.decode()
 
-
-@app.route('/payment_success', methods=['POST', 'GET'])
+@app.route('/payment_success', methods=['POST'])
 def payment_success():
     try:
         print("✅ Entered payment_success route")
-
-        # Handle both POST form and GET query params
-        if request.method == "POST":
-            razorpay_order_id = request.form.get('razorpay_order_id')
-        else:
-            razorpay_order_id = request.args.get('razorpay_order_id')
-
+        razorpay_order_id = request.form.get('razorpay_order_id')
         print("📦 Razorpay Order ID:", razorpay_order_id)
 
         if not razorpay_order_id:
             return "❌ Razorpay order ID not found", 400
 
-        cart = session.get('cart', {})
-        if not cart:
-            print("❌ Cart is empty or session expired")
-            return "❌ Cart is empty or session expired", 400
+        # Find the order by Razorpay order ID
+        response = supabase.table('orders') \
+            .select('id, name') \
+            .eq('razorpay_order_id', razorpay_order_id) \
+            .limit(1).execute()
 
-        customer = session.get('order_customer', {})
-        customer_name = customer.get('name')
-        customer_email = customer.get('email')
-        customer_phone = customer.get('phone')
-        street = customer.get('address')
+        if not response.data:
+            return "❌ No order found with Razorpay Order ID", 404
 
-        products = get_cart_products(cart)
-        total = sum(item['subtotal'] for item in products)
-        items_summary = json.dumps(products)  # ✅ Store actual details, not plain string
+        order = response.data[0]
 
-        # Insert order into DB
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO orders (
-                razorpay_order_id,
-                name,
-                email,
-                phone,
-                street_address,
-                is_paid,
-                order_details,
-                total_money,
-                status,
-                created_at
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-            """,
-            (
-                razorpay_order_id,
-                customer_name,
-                customer_email,
-                customer_phone,
-                street,
-                True,
-                items_summary,
-                total,
-                'pending'
-            )
-        )
-        conn.commit()
-        conn.close()
-        print("✅ Order successfully inserted into DB.")
+        # Update the order to mark it paid
+        supabase.table('orders').update({
+            'is_paid': True
+        }).eq('id', order['id']).execute()
 
-        # Clear session
         session.pop('cart', None)
-        session.pop('order_customer', None)
+        session.pop('latest_email', None)
 
-        return render_template('payment_success.html', name=customer_name)
+        return render_template('payment_success.html', name=order.get('name', 'Customer'))
 
     except Exception as e:
         import traceback
         traceback.print_exc()
         return "Internal Server Error", 500
+
 
 
 
@@ -576,9 +490,18 @@ def checkout():
     razorpay_order_id = razorpay_order['id']
     callback_url = "/payment_success"
 
-    # ✅ Fetch user data from Supabase using session['user_id']
+    # Update last unpaid order with this razorpay_order_id
+    if 'latest_email' in session:
+        supabase.table('orders').update({
+            'razorpay_order_id': razorpay_order_id
+        }).eq('email', session['latest_email']) \
+          .eq('is_paid', False) \
+          .order('id', desc=True) \
+          .limit(1).execute()
+
+    # Fetch user data for autofill
     user = get_user_by_id(session['user_id']) if 'user_id' in session else None
-    print("User ID in session:", session.get('user_id'))
+
     return render_template('checkout.html',
                            products=products,
                            subtotal=subtotal,
@@ -588,6 +511,7 @@ def checkout():
                            key_id=os.getenv("RAZORPAY_KEY"),
                            callback_url=callback_url,
                            user=user)
+
 # @app.route('/checkout', methods=['GET'])
 # def checkout():
 #     cart = session.get('cart', {})
