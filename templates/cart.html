@@ -312,8 +312,8 @@
           <h5>Order Summary</h5>
           <hr />
           <p>Total Price: ₹<span id="cart-total">{{ total }}</span></p>
-          <p>Shipping: ₹<span id="shipping">70</span></p>
-          <h6 class="fw-bold">Grand Total: ₹<span id="grand-total">{{ total + 70 }}</span></h6>
+          <p>Shipping: ₹<span id="shipping">0</span></p>
+          <h6 class="fw-bold">Grand Total: ₹<span id="grand-total">{{ total + 0 }}</span></h6>
           {% if session.get('user_id') %}
             <a href="/checkout" class="btn btn-checkout mt-3">Proceed to Checkout</a>
           {% else %}
@@ -372,7 +372,7 @@
       total += subtotal;
     });
     document.getElementById('cart-total').textContent = total.toFixed(2);
-    const shipping = 70;
+    const shipping = 0;
     document.getElementById('grand-total').textContent = (total + shipping).toFixed(2);
   }
 
