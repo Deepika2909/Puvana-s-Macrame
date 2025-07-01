@@ -792,7 +792,7 @@ def admin():
                     'name': o["name"],
                     'email': o["email"],
                     'phone': o["phone"],
-                    'address': f"{o['street_address']}, {o['city']}, {o['state']} - {o['pincode']}",
+                    'address': f"{o['street_address']}",
                     'is_paid': o["is_paid"],
                     'details': details,
                     'total': o["total_money"],
