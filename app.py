@@ -355,52 +355,64 @@ def get_user_by_id(user_id):
 #         traceback.print_exc()
 #         return "Internal Server Error", 500
 
-
 @app.route('/place_order', methods=['POST'])
 def place_order():
     if 'user_id' not in session:
         flash("Please log in first.")
         return redirect('/user')
 
-    name = request.form['name']
-    email = request.form['email']
-    phone = request.form['phone']
-    street_address = request.form['address']
-    city = request.form.get('city', '')
-    state = request.form.get('state', '')
-    pincode = request.form.get('pincode', '')
-    payment_method = request.form.get('payment', 'COD')
+    try:
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+        street_address = request.form['address']
+        city = request.form.get('city', '')
+        state = request.form.get('state', '')
+        pincode = request.form.get('pincode', '')
+        payment_method = request.form.get('payment', 'COD')
 
-    cart = session.get('cart', {})
-    products = get_cart_products(cart)
-    subtotal = sum(item['subtotal'] for item in products)
-    total = subtotal  # No shipping
-    order_details = json.dumps(products)
+        cart = session.get('cart', {})
+        if not cart:
+            flash("❌ Your cart is empty.")
+            return redirect('/cart')
 
-    # Store for Razorpay success callback
-    session['latest_email'] = email
+        products = get_cart_products(cart)
+        if not products:
+            flash("❌ No products found in cart.")
+            return redirect('/cart')
 
-    # Store order in DB (for both COD and UPI)
-    supabase.table('orders').insert({
-        "name": name,
-        "email": email,
-        "phone": phone,
-        "street_address": street_address,
-        "city": city,
-        "state": state,
-        "pincode": pincode,
-        "order_details": order_details,
-        "total_money": total,
-        "is_paid": payment_method == "COD",
-        "status": "pending"
-    }).execute()
+        subtotal = sum(item['subtotal'] for item in products)
+        total = subtotal  # No shipping
+        order_details = json.dumps(products)
 
-    if payment_method == 'COD':
-        session.pop('cart', None)
-        flash("✅ Order placed with Cash on Delivery.")
-        return redirect('/thank_you')
-    else:
-        return redirect('/checkout')  # Redirect to Razorpay form
+        # Store for Razorpay success callback
+        session['latest_email'] = email
+
+        # Store order in DB
+        supabase.table('orders').insert({
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "street_address": street_address,
+            "order_details": order_details,
+            "total_money": total,
+            "is_paid": payment_method == "COD",
+            "status": "pending"
+        }).execute()
+
+        if payment_method == 'COD':
+            session.pop('cart', None)
+            session.pop('latest_email', None)
+            flash("✅ Order placed with Cash on Delivery.")
+            return redirect('/thank_you')
+        else:
+            return redirect('/checkout')  # Razorpay flow
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        flash("❌ Something went wrong while placing the order.")
+        return redirect('/cart')
 
 
 @app.route('/simulate_payment_success')
@@ -490,16 +502,20 @@ def checkout():
     razorpay_order_id = razorpay_order['id']
     callback_url = "/payment_success"
 
-    # Update last unpaid order with this razorpay_order_id
+    # ✅ Only update if session has latest_email
     if 'latest_email' in session:
-        supabase.table('orders').update({
-            'razorpay_order_id': razorpay_order_id
-        }).eq('email', session['latest_email']) \
-          .eq('is_paid', False) \
-          .order('id', desc=True) \
-          .limit(1).execute()
+        response = supabase.table('orders') \
+            .select('id') \
+            .eq('email', session['latest_email']) \
+            .eq('is_paid', False) \
+            .execute()
 
-    # Fetch user data for autofill
+        if response.data:
+            latest_unpaid_order = max(response.data, key=lambda x: x['id'])
+            supabase.table('orders').update({
+                'razorpay_order_id': razorpay_order_id
+            }).eq('id', latest_unpaid_order['id']).execute()
+
     user = get_user_by_id(session['user_id']) if 'user_id' in session else None
 
     return render_template('checkout.html',
@@ -511,6 +527,7 @@ def checkout():
                            key_id=os.getenv("RAZORPAY_KEY"),
                            callback_url=callback_url,
                            user=user)
+
 
 # @app.route('/checkout', methods=['GET'])
 # def checkout():
